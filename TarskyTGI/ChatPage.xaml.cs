@@ -12,6 +12,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -27,13 +28,26 @@ namespace TarskyTGI
         {
             this.InitializeComponent();
         }
+
         private void ClearFN(object sender, RoutedEventArgs e)
         {
             ChatHistory.Items.Clear();
         }
         private void SendFN(object sender, RoutedEventArgs e)
         {
-            ChatHistory.Items.Add("a");
+            if (PromptBox.Text.Trim() != string.Empty)
+            {
+                ChatHistory.Items.Add(PromptBox.Text.Trim());
+            }
+            PromptBox.Text = string.Empty;
+        }
+        private void PromptBox_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Enter && !Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Shift).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down))
+            {
+                e.Handled = true;
+                SendFN(sender, e);
+            }
         }
     }
 }
