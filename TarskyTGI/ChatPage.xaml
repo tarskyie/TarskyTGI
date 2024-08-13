@@ -10,15 +10,23 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
+        <!--define rows and columns-->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="70"/>
             <ColumnDefinition Width="70"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="35"/>
         </Grid.RowDefinitions>
+        
+        <!--Chat interface done with listbox-->
+
+        <ListBox MinWidth="200" Grid.Row="0" x:Name="ChatHistory"></ListBox>
+
         <TextBox PlaceholderText="Your prompt here" Height="30" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Column="0" Grid.Row="1"/>
-        <Button HorizontalAlignment="Stretch" Content="Send" Grid.Column="1" Grid.Row="1"/>
+        <Button HorizontalAlignment="Stretch" Content="Send" Grid.Column="1" Grid.Row="1" Click="SendFN"/>
+        <Button HorizontalAlignment="Stretch" Content="Clear" Grid.Column="2" Grid.Row="1" Click="ClearFN"/>
     </Grid>
 </Page>

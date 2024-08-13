@@ -27,5 +27,13 @@ namespace TarskyTGI
         {
             this.InitializeComponent();
         }
+        private void ClearFN(object sender, RoutedEventArgs e)
+        {
+            ChatHistory.Items.Clear();
+        }
+        private void SendFN(object sender, RoutedEventArgs e)
+        {
+            ChatHistory.Items.Add("a");
+        }
     }
 }
