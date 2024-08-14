@@ -30,6 +30,10 @@
             </ListBox.ItemTemplate>
         </ListBox>
         
+        <!--Side bar-->
+        <TextBlock x:Name="StatusTextBlock" Text="Not loaded Yet!!" Grid.Column="1"/>
+        <Button x:Name="loadbtn" Content="Start" Grid.Column="1" Click="LoadModelButton_Click"/>
+
         <!--Bottom stuff-->
         <TextBox PlaceholderText="Your prompt here"
                  PreviewKeyDown="PromptBox_KeyDown"

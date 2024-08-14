@@ -59,6 +59,11 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="textgenerator.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <Page Update="ChatPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
