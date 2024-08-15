@@ -1,3 +1,4 @@
+from tracemalloc import stop
 import llama_cpp
 import sys
 
@@ -9,7 +10,8 @@ def continue_text(input_text):
     top_p = 0.95
     min_p = 0.05
     typical_p = 1
-    output = model(input_text, max_tokens=max_tokens, temperature=temperature, top_p=top_p, min_p=min_p, typical_p=typical_p)["choices"][0]["text"]
+    stoplist=["[newline]User:", "[newline]Assistant:"]
+    output = model(input_text, max_tokens=max_tokens, temperature=temperature, top_p=top_p, min_p=min_p, typical_p=typical_p, stop=stoplist)["choices"][0]["text"]
     return output
 
 def load_model(model_path):

@@ -90,7 +90,7 @@ namespace TarskyTGI
         {
             if (PromptBox.Text.Trim() != string.Empty)
             {
-                ChatHistory.Items.Add(PromptBox.Text.Trim());
+                ChatHistory.Items.Add("User: "+PromptBox.Text.Trim());
                 if (!modelLoaded)
                 {
                     StatusTextBlock.Text = "Please load a model first.";
@@ -98,8 +98,10 @@ namespace TarskyTGI
                 }
 
                 string inputText = PromptBox.Text.Trim();
-                string generatedText = await GenerateText("User: "+inputText+"[newline]Assistant: ");
-                ChatHistory.Items.Add(generatedText);
+                string itemsAsString = GetListBoxItemsAsNewlineSeparatedString(ChatHistory);
+                string generatedText = await GenerateText(itemsAsString+"[newline]User: "+inputText+"[newline]Assistant: ");
+                string outputString = generatedText.Replace("[newline]", "\n");
+                ChatHistory.Items.Add("Assistant:"+outputString);
             }
             PromptBox.Text = string.Empty;
         }
@@ -132,6 +134,11 @@ namespace TarskyTGI
                 return $"Error: {response.Substring(response.IndexOf(':') + 1)}";
             }
             return "Unknown error occurred.";
+        }
+
+        string GetListBoxItemsAsNewlineSeparatedString(ListBox listBox)
+        {
+            return string.Join("[newline]", listBox.Items.Cast<object>().Select(item => item.ToString()));
         }
 
         private async void Window_Closed(object sender, WindowEventArgs args)
