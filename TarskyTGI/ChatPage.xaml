@@ -20,7 +20,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="55"/>
         </Grid.RowDefinitions>
-        
+
         <!--Chat interface done with listbox-->
         <ListBox Grid.Row="0" x:Name="ChatHistory">
             <ListBox.ItemTemplate>
@@ -29,22 +29,25 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        
+
         <!--Side bar-->
-        <TextBlock x:Name="StatusTextBlock" Text="Not loaded Yet!!" Grid.Column="1"/>
-        <Button x:Name="loadbtn" Content="Start" Grid.Column="1" Click="LoadModelButton_Click"/>
+        <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="2" VerticalAlignment="Top">
+            <TextBlock x:Name="StatusTextBlock" Text="Not loaded"/>
+            <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click"/>
+            <TextBox x:Name="ModelBox" Width="140" PlaceholderText="Model path"/>
+        </StackPanel>
 
         <!--Bottom stuff-->
         <TextBox PlaceholderText="Your prompt here"
-                 PreviewKeyDown="PromptBox_KeyDown"
-                 Height="50" 
-                 HorizontalAlignment="Stretch" 
-                 VerticalAlignment="Stretch" 
-                 Grid.Column="0" Grid.Row="1" 
-                 x:Name="PromptBox" 
-                 TextWrapping="Wrap"
-                 AcceptsReturn="True"
-                 />
+             PreviewKeyDown="PromptBox_KeyDown"
+             Height="50" 
+             HorizontalAlignment="Stretch" 
+             VerticalAlignment="Stretch" 
+             Grid.Column="0" Grid.Row="1" 
+             x:Name="PromptBox" 
+             TextWrapping="Wrap"
+             AcceptsReturn="True"
+             />
 
         <Button HorizontalAlignment="Stretch" Content="Send" Grid.Column="1" Grid.Row="1" Click="SendFN"/>
         <Button HorizontalAlignment="Stretch" Content="Clear" Grid.Column="2" Grid.Row="1" Click="ClearFN"/>

@@ -5,12 +5,12 @@ import sys
 model = None
 
 def continue_text(input_text):
-    max_tokens = 200
+    max_tokens = 2048
     temperature = 0.8
     top_p = 0.95
     min_p = 0.05
     typical_p = 1
-    stoplist=["[newline]User:", "[newline]Assistant:"]
+    stoplist=["\nUser:", "\nAssistant:", "###", "\nAI"]
     output = model(input_text, max_tokens=max_tokens, temperature=temperature, top_p=top_p, min_p=min_p, typical_p=typical_p, stop=stoplist)["choices"][0]["text"]
     return output
 
@@ -32,11 +32,13 @@ while True:
         if model is not None:
             try:
                 response = continue_text(ch)
+                response = response.replace("\n", "\\n")
                 print(f"$response$:{response}", flush=True)
             except Exception as e:
                 print(f"$error$:{str(e)}", flush=True)
         else:
             print("$not_loaded$", flush=True)
+        #print("$generation_stop$")
     elif cmd == "exit":
         break
     sys.stdout.flush()
