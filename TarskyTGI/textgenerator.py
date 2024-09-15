@@ -1,16 +1,20 @@
 from tracemalloc import stop
 import llama_cpp
 import sys
+import json
 
 model = None
 
 def continue_text(input_text):
-    max_tokens = 2048
+    with open('chatstuff.json', 'r') as f:
+        data = json.load(f)
+
+    max_tokens = data['n_predict']
     temperature = 0.8
     top_p = 0.95
     min_p = 0.05
     typical_p = 1
-    stoplist=["\nUser:", "\nAssistant:", "###", "\nAI"]
+    stoplist=["\nUser:", "\nAssistant:", "###", "\nAI", "User:", "\nQuestion:", "Assistant:", "Question:"]
     output = model(input_text, max_tokens=max_tokens, temperature=temperature, top_p=top_p, min_p=min_p, typical_p=typical_p, stop=stoplist)["choices"][0]["text"]
     return output
 

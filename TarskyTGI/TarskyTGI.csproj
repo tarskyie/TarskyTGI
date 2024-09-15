@@ -60,6 +60,9 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="chatstuff.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="textgenerator.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

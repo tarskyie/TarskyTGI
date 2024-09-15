@@ -12,9 +12,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.System;
+using System.Text.Json;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -35,6 +37,20 @@ namespace TarskyTGI
         {
             this.InitializeComponent();
             InitializePythonProcess();
+            loadJson();
+        }
+
+        private void loadJson()
+        {
+            string jsonString = File.ReadAllText("chatstuff.json");
+            ChatClass jsonToLoad = JsonSerializer.Deserialize<ChatClass>(jsonString);
+            ModelBox.Text = jsonToLoad.model;
+            ctxBox.Text = jsonToLoad.n_ctx.ToString();
+            predictBox.Text = jsonToLoad.n_predict.ToString();
+            temperatureBox.Text = jsonToLoad.temperature.ToString();
+            toppBox.Text = jsonToLoad.top_p.ToString();
+            minpBox.Text = jsonToLoad.min_p.ToString();
+            typicalpBox.Text = jsonToLoad.typical_p.ToString();
         }
 
         private void InitializePythonProcess()
@@ -158,5 +174,26 @@ namespace TarskyTGI
                 pythonProcess.Dispose();
             }
         }
+
+        //Additional SideBar stuff
+        private void ModelBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            //float check = float.Parse(temperatureBox.Text.Replace('.', ','));
+            var chatClass = new ChatClass(ModelBox.Text.Trim(), int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')));
+            //ChatClass chatClass = new ChatClass("aaaa", 1028, 128);
+
+            string jsonString = JsonSerializer.Serialize(chatClass);
+
+            File.WriteAllText("chatstuff.json", jsonString); 
+        }
+        private void TextBox_BeforeTextChanging(TextBox sender, TextBoxBeforeTextChangingEventArgs args)
+        {
+            args.Cancel = args.NewText.Any(c => !char.IsDigit(c));
+        }
+        private void TextBox2_BeforeTextChanging(TextBox sender, TextBoxBeforeTextChangingEventArgs args)
+        {
+            args.Cancel = args.NewText.Any(c => !char.IsDigit(c) && c != '.');
+        }
+
     }
 }
