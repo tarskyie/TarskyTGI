@@ -23,6 +23,9 @@
                 <muxc:NavigationViewItem Content="HuggingFace" Icon="Emoji" Tag="hfPage"/>
                 <muxc:NavigationViewItem Content="Downloads" Icon="Download" Tag="dwnlds"/>
                 <muxc:NavigationViewItem Content="Chat" Icon="Message" Tag="ChatApp"/>
+                <muxc:NavigationViewItem Content="Instruct" Icon="Play" Tag="InstructApp"/>
+                <muxc:NavigationViewItem Content="Base" Icon="Page" Tag="BaseApp"/>
+                <muxc:NavigationViewItem Content="Host" Icon="Globe" Tag="HostApp"/>
             </muxc:NavigationView.MenuItems>
             <Frame x:Name="ContentFrame"/>
         </muxc:NavigationView>

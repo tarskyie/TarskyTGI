@@ -27,10 +27,13 @@
     <SupportedOSPlatformVersion>10.0.18362.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="BasePage.xaml" />
     <None Remove="ChatPage.xaml" />
     <None Remove="downloadsPage.xaml" />
     <None Remove="hfPage.xaml" />
     <None Remove="HomePage.xaml" />
+    <None Remove="HostPage.xaml" />
+    <None Remove="InstructPage.xaml" />
   </ItemGroup> 
 
   <ItemGroup>
@@ -60,9 +63,18 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
+    <Page Update="BasePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <None Update="chatstuff.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="HostPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="InstructPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <None Update="textgenerator.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

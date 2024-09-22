@@ -38,6 +38,15 @@ namespace TarskyTGI
                     case "ChatApp":
                         ContentFrame.Navigate(typeof(ChatPage));
                         break;
+                    case "InstructApp":
+                        ContentFrame.Navigate(typeof(InstructPage));
+                        break;
+                    case "BaseApp":
+                        ContentFrame.Navigate(typeof(BasePage));
+                        break;
+                    case "HostApp":
+                        ContentFrame.Navigate(typeof(HostPage));
+                        break;
                     case "HomeApp":
                         ContentFrame.Navigate(typeof(HomePage));
                         break;

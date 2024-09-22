@@ -178,13 +178,17 @@ namespace TarskyTGI
         //Additional SideBar stuff
         private void ModelBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            //float check = float.Parse(temperatureBox.Text.Replace('.', ','));
-            var chatClass = new ChatClass(ModelBox.Text.Trim(), int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')));
-            //ChatClass chatClass = new ChatClass("aaaa", 1028, 128);
+            try
+            {
+                //float check = float.Parse(temperatureBox.Text.Replace('.', ','));
+                var chatClass = new ChatClass(ModelBox.Text.Trim(), int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')));
+                //ChatClass chatClass = new ChatClass("aaaa", 1028, 128);
 
-            string jsonString = JsonSerializer.Serialize(chatClass);
+                string jsonString = JsonSerializer.Serialize(chatClass);
 
-            File.WriteAllText("chatstuff.json", jsonString); 
+                File.WriteAllText("chatstuff.json", jsonString);
+            }
+            catch { }
         }
         private void TextBox_BeforeTextChanging(TextBox sender, TextBoxBeforeTextChangingEventArgs args)
         {
