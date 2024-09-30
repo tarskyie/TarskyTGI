@@ -66,7 +66,13 @@
     <Page Update="BasePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <None Update="basestuff.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="chatstuff.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="basegenerator.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Page Update="HostPage.xaml">

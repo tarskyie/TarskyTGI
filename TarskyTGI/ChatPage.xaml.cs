@@ -17,6 +17,9 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.System;
 using System.Text.Json;
+using Windows.Storage.Pickers;
+using Windows.Storage;
+using WinRT.Interop;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -198,6 +201,23 @@ namespace TarskyTGI
         {
             args.Cancel = args.NewText.Any(c => !char.IsDigit(c) && c != '.');
         }
+        //Select file
+        private async void selectModelButton_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new FileOpenPicker();
+            var hwnd = WindowNative.GetWindowHandle(App.m_window);
+            InitializeWithWindow.Initialize(picker, hwnd);
 
+            picker.ViewMode = PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = PickerLocationId.Desktop;
+            picker.FileTypeFilter.Add(".gguf");
+            picker.FileTypeFilter.Add(".bin");
+
+            StorageFile file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                ModelBox.Text = file.Path;
+            }
+        }
     }
 }
