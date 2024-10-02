@@ -75,6 +75,12 @@
     <None Update="basegenerator.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="instruct.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="instruct.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Page Update="HostPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -21,7 +21,7 @@
             <RowDefinition Height="55"/>
         </Grid.RowDefinitions>
 
-        <!--Chat interface done with listbox-->
+        <!--Base interface done with textbox-->
         <TextBox
             x:Name="mainText"
             Grid.Row="0"
@@ -43,7 +43,7 @@
         </StackPanel>
 
         <!--Bottom stuff-->
-        <TextBox PlaceholderText="Your prompt here"
+        <TextBox PlaceholderText="Your prompt here. Shift+Enter to newline."
          PreviewKeyDown="PromptBox_KeyDown"
          Height="50" 
          HorizontalAlignment="Stretch" 

@@ -45,7 +45,7 @@
         </StackPanel>
 
         <!--Bottom stuff-->
-        <TextBox PlaceholderText="Your prompt here"
+        <TextBox PlaceholderText="Your prompt here. Shift+Enter to newline."
              PreviewKeyDown="PromptBox_KeyDown"
              Height="50" 
              HorizontalAlignment="Stretch" 
