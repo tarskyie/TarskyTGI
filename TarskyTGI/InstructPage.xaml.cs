@@ -86,8 +86,49 @@ namespace TarskyTGI
 
         private async void SendFN(object sender, RoutedEventArgs e)
         {
+            if (PromptBox.Text.Trim() != string.Empty)
+            {
+                //outputBox.Text = outputBox.Text + PromptBox.Text.Trim();
+                if (!modelLoaded)
+                {
+                    StatusTextBlock.Text = "Please load a model first.";
+                    return;
+                }
 
+                string inputText = PromptBox.Text.Trim();
+                string itemsAsString = outputBox.Text;
+                string generatedText = await GenerateText(itemsAsString + inputText);
+                outputBox.Text = string.Empty;
+                string outputString = generatedText.Replace("\\n", "\n");
+                //string outputString = generatedText;
+                outputBox.Text += outputString;
+            }
+            PromptBox.Text = string.Empty;
         }
+
+        private async Task<string> GenerateText(string inputText)
+        {
+            await pythonInput.WriteLineAsync("chat");
+            await pythonInput.WriteLineAsync(inputText);
+            await pythonInput.FlushAsync();
+
+            string response = await pythonOutput.ReadLineAsync();
+            if (response.StartsWith("$not_loaded$"))
+            {
+                return "Error: Model not loaded.";
+            }
+            else if (response.StartsWith("$response$"))
+            {
+                return response.Substring(response.IndexOf(':') + 1);
+            }
+            else if (response.StartsWith("$error$"))
+            {
+                return $"Error: {response.Substring(response.IndexOf(':') + 1)}";
+            }
+            //return "Unknown error occurred.";
+            return response;
+        }
+
         private async void LoadModelButton_Click(object sender, RoutedEventArgs e)
         {
             //string modelPath = "C:/Users/ivany/Downloads/Phi-3.1-mini-4k-instruct-Q4_K_L.gguf";
