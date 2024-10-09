@@ -10,6 +10,18 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-
+        <TextBlock x:Name="StatusTextBlock" 
+                   VerticalAlignment="Center" 
+                   HorizontalAlignment="Center" 
+                   TextWrapping="Wrap" 
+                   FontSize="24"
+                   Text="Offline"/>
+        <StackPanel>
+            <Button Content="Start hosting"
+                Click="Button_StartServer_Click"/>
+            <Button Content="Stop hosting"
+                Click="Button_StopServer_Click"/>
+        </StackPanel>
+        
     </Grid>
 </Page>
