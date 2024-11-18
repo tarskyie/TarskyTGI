@@ -110,7 +110,7 @@ namespace TarskyTGI
         {
             if (PromptBox.Text.Trim() != string.Empty)
             {
-                ChatHistory.Items.Add("User: "+PromptBox.Text.Trim());
+                ChatHistory.Items.Add(PromptBox.Text.Trim());
                 if (!modelLoaded)
                 {
                     StatusTextBlock.Text = "Please load a model first.";
@@ -119,10 +119,10 @@ namespace TarskyTGI
 
                 string inputText = PromptBox.Text.Trim();
                 string itemsAsString = GetListBoxItemsAsNewlineSeparatedString(ChatHistory);
-                string generatedText = await GenerateText(itemsAsString+"\\nUser: "+inputText+"\\nAssistant: ");
+                string generatedText = await GenerateText(itemsAsString+ "<|user|>" + inputText+ "<|end|><|assistant|>");
                 string outputString = generatedText.Replace("\\n", "\n");
                 //string outputString = generatedText;
-                ChatHistory.Items.Add("Assistant:"+outputString);
+                ChatHistory.Items.Add(outputString);
             }
             PromptBox.Text = string.Empty;
         }
@@ -160,7 +160,8 @@ namespace TarskyTGI
 
         string GetListBoxItemsAsNewlineSeparatedString(ListBox listBox)
         {
-            return string.Join("\\n", listBox.Items.Cast<object>().Select(item => item.ToString()));
+            return string.Join("",listBox.Items.Cast<object>().Select(item => item.ToString()));
+            //return string.Join("\\n", listBox.Items.Cast<object>().Select(item => item.ToString()));
         }
 
         private async void Window_Closed(object sender, WindowEventArgs args)
