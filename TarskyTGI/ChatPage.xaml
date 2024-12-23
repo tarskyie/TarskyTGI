@@ -10,7 +10,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <!--define rows and columns-->
+        <!-- Define rows and columns -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="70"/>
@@ -21,16 +21,16 @@
             <RowDefinition Height="55"/>
         </Grid.RowDefinitions>
 
-        <!--Chat interface done with listbox-->
+        <!-- Chat interface done with listbox -->
         <ListBox Grid.Row="0" x:Name="ChatHistory">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                    <TextBox Text="{Binding}" TextWrapping="Wrap" IsReadOnly="True"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <!--Side bar-->
+        <!-- Side bar -->
         <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="2" VerticalAlignment="Top">
             <TextBlock x:Name="StatusTextBlock" Text="Not loaded"/>
             <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click"/>
@@ -44,7 +44,7 @@
             <TextBox x:Name="typicalpBox" Width="140" PlaceholderText="typical_p" Text="1" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
         </StackPanel>
 
-        <!--Bottom stuff-->
+        <!-- Bottom stuff -->
         <TextBox PlaceholderText="Your prompt here. Shift+Enter to newline."
              PreviewKeyDown="PromptBox_KeyDown"
              Height="50" 
