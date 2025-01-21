@@ -20,14 +20,8 @@ using Windows.Storage;
 using WinRT.Interop;
 using Windows.ApplicationModel.DataTransfer;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace TarskyTGI
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class InstructPage : Page
     {
         private Process pythonProcess;
@@ -60,7 +54,7 @@ namespace TarskyTGI
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "python",
+                    FileName = "py",
                     Arguments = "instruct.py",
                     UseShellExecute = false,
                     RedirectStandardInput = true,
@@ -159,7 +153,7 @@ namespace TarskyTGI
             try
             {
                 //float check = float.Parse(temperatureBox.Text.Replace('.', ','));
-                var chatClass = new ChatClass(ModelBox.Text.Trim(), int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')));
+                var chatClass = new ChatClass(ModelBox.Text.Trim(), "chatml", int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')), 35);
                 //ChatClass chatClass = new ChatClass("aaaa", 1028, 128);
 
                 string jsonString = JsonSerializer.Serialize(chatClass);

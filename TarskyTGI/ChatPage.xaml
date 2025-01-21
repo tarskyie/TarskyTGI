@@ -32,7 +32,7 @@
 
         <!-- Side bar -->
         <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="2" VerticalAlignment="Top">
-            <TextBlock x:Name="StatusTextBlock" Text="Not loaded"/>
+            <TextBlock x:Name="StatusTextBlock" Text="Not loaded."/>
             <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click"/>
             <TextBox x:Name="ModelBox" Width="140" PlaceholderText="Model path" TextChanged="ModelBox_TextChanged"/>
             <Button x:Name="selectModelButton" Content="Select file" Click="selectModelButton_Click"/>

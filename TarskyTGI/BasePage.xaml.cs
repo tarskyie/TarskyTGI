@@ -60,7 +60,7 @@ namespace TarskyTGI
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "python",
+                    FileName = "py",
                     Arguments = "basegenerator.py",
                     UseShellExecute = false,
                     RedirectStandardInput = true,
@@ -182,7 +182,7 @@ namespace TarskyTGI
             try
             {
                 //float check = float.Parse(temperatureBox.Text.Replace('.', ','));
-                var chatClass = new ChatClass(ModelBox.Text.Trim(), int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')));
+                var chatClass = new ChatClass(ModelBox.Text.Trim(), "chatml", int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')), 35);
                 //ChatClass chatClass = new ChatClass("aaaa", 1028, 128);
 
                 string jsonString = JsonSerializer.Serialize(chatClass);

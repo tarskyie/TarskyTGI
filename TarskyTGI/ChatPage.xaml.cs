@@ -62,7 +62,7 @@ namespace TarskyTGI
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "python",
+                    FileName = "py",
                     Arguments = "textgenerator.py",
                     UseShellExecute = false,
                     RedirectStandardInput = true,
@@ -85,15 +85,18 @@ namespace TarskyTGI
 
         private async Task LoadModel(string modelPath)
         {
+            StatusTextBlock.Text = "Loading model...";
+            //TODO exceptions
             await pythonInput.WriteLineAsync("load");
             await pythonInput.WriteLineAsync(modelPath);
             await pythonInput.FlushAsync();
 
             string response = await pythonOutput.ReadLineAsync();
+            
             if (response.StartsWith("$model_loaded$"))
             {
                 modelLoaded = true;
-                StatusTextBlock.Text = "LOADED.";
+                StatusTextBlock.Text = "Ready.";
             }
             else if (response.StartsWith("$model_load_error$"))
             {
@@ -102,8 +105,11 @@ namespace TarskyTGI
             }
         }
 
-        private void ClearFN(object sender, RoutedEventArgs e)
+        private async void ClearFN(object sender, RoutedEventArgs e)
         {
+            await pythonInput.WriteLineAsync("clear");
+            await pythonInput.FlushAsync();
+
             ChatHistory.Items.Clear();
         }
         private async void SendFN(object sender, RoutedEventArgs e)
@@ -111,20 +117,21 @@ namespace TarskyTGI
             if (PromptBox.Text.Trim() != string.Empty)
             {
                 ChatHistory.Items.Add(PromptBox.Text.Trim());
+                StatusTextBlock.Text = "Generating response...";
                 if (!modelLoaded)
                 {
                     StatusTextBlock.Text = "Please load a model first.";
                     return;
                 }
-
+                
                 string inputText = PromptBox.Text.Trim();
-                string itemsAsString = GetListBoxItemsAsNewlineSeparatedString(ChatHistory);
-                string generatedText = await GenerateText(itemsAsString+ "<|user|>" + inputText+ "<|end|><|assistant|>");
+                PromptBox.Text = string.Empty;
+                string generatedText = await GenerateText(inputText);
                 string outputString = generatedText.Replace("\\n", "\n");
                 //string outputString = generatedText;
+                StatusTextBlock.Text = "Ready.";
                 ChatHistory.Items.Add(outputString);
             }
-            PromptBox.Text = string.Empty;
         }
         private void PromptBox_KeyDown(object sender, KeyRoutedEventArgs e)
         {
@@ -156,6 +163,7 @@ namespace TarskyTGI
             }
             //return "Unknown error occurred.";
             return response;
+            //return inputText;
         }
 
         string GetListBoxItemsAsNewlineSeparatedString(ListBox listBox)
@@ -164,28 +172,13 @@ namespace TarskyTGI
             //return string.Join("\\n", listBox.Items.Cast<object>().Select(item => item.ToString()));
         }
 
-        private async void Window_Closed(object sender, WindowEventArgs args)
-        {
-            if (pythonProcess != null && !pythonProcess.HasExited)
-            {
-                await pythonInput.WriteLineAsync("exit");
-                await pythonInput.FlushAsync();
-                pythonProcess.WaitForExit(1000);
-                if (!pythonProcess.HasExited)
-                {
-                    pythonProcess.Kill();
-                }
-                pythonProcess.Dispose();
-            }
-        }
-
         //Additional SideBar stuff
         private void ModelBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             try
             {
                 //float check = float.Parse(temperatureBox.Text.Replace('.', ','));
-                var chatClass = new ChatClass(ModelBox.Text.Trim(), int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')));
+                var chatClass = new ChatClass(ModelBox.Text.Trim(), "chatml", int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')), 35);
                 //ChatClass chatClass = new ChatClass("aaaa", 1028, 128);
 
                 string jsonString = JsonSerializer.Serialize(chatClass);

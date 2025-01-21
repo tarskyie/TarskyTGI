@@ -8,10 +8,8 @@ using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace TarskyTGI
 {
@@ -39,15 +37,16 @@ namespace TarskyTGI
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
             ContentFrame.Navigate(typeof(HomePage));
-            
         }
 
         private async void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
-            await TerminateProcessesAsync();
-
+            
             if (args.SelectedItemContainer != null && navigationMap.TryGetValue(args.SelectedItemContainer.Tag.ToString(), out Type pageType))
             {
+                await TerminateProcessesAsync();
+                ContentFrame.IsEnabled = false;
+                ContentFrame.IsEnabled = true;
                 ContentFrame.Navigate(pageType);
             }
         }
@@ -56,9 +55,9 @@ namespace TarskyTGI
         {
             foreach (string processName in processNames)
             {
-                Process[] processes = Process.GetProcessesByName(processName);
+                Process[] processes = Process.GetProcesses();
 
-                foreach (Process process in processes)
+                foreach (Process process in processes.Where(p => p.ProcessName.Contains(processName, StringComparison.OrdinalIgnoreCase)))
                 {
                     try
                     {
@@ -70,19 +69,6 @@ namespace TarskyTGI
                         Console.WriteLine($"Failed to terminate process: {process.ProcessName}, PID: {process.Id}, Error: {ex.Message}");
                     }
                 }
-            }
-        }
-        private void TrySetMicaBackdrop()
-        {
-            if (MicaController.IsSupported())
-            {
-                backdropConfiguration = new SystemBackdropConfiguration();
-                backdropConfiguration.IsInputActive = true;
-                backdropConfiguration.Theme = SystemBackdropTheme.Default;
-
-                micaController = new MicaController();
-                micaController.AddSystemBackdropTarget(Window.As<ICompositionSupportsSystemBackdrop>());
-                micaController.SetSystemBackdropConfiguration(backdropConfiguration);
             }
         }
     }

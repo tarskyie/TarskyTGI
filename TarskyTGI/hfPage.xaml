@@ -10,6 +10,6 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <WebView2 x:Name="hfWebView2" Source="https://www.huggingface.co" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" MinHeight="200" MinWidth="200"/>
+        <WebView2 x:Name="hfWV2" Source="https://www.huggingface.co" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" MinHeight="200" MinWidth="200"/>
     </Grid>
 </Page>
