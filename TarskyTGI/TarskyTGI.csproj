@@ -23,6 +23,8 @@
 		<WindowsPackageType>None</WindowsPackageType>
 		<PackageCertificateThumbprint>4C848677B095F27C23C32902E82A645C884A827E</PackageCertificateThumbprint>
 		<SupportedOSPlatformVersion>10.0.18362.0</SupportedOSPlatformVersion>
+		<PackageIcon>icon.png</PackageIcon>
+		<ApplicationIcon>Assets\icon.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -60,6 +62,12 @@
   -->
   <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <ProjectCapability Include="Msix" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\TarskyTGI-Installer\TarskyTGI-Installer\icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Page Update="BasePage.xaml">

@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
 
 namespace TarskyTGI
 {
@@ -34,9 +36,20 @@ namespace TarskyTGI
         {
             //TrySetMicaBackdrop();
             this.InitializeComponent();
+            this.Activated += MainWindow_Activated;
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
             ContentFrame.Navigate(typeof(HomePage));
+        }
+
+        // ...
+
+        private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
+        {
+            IntPtr windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            WindowId windowId = Win32Interop.GetWindowIdFromWindow(windowHandle);
+            AppWindow appWindow = AppWindow.GetFromWindowId(windowId); 
+            appWindow.SetIcon(@"Assets\icon.ico");
         }
 
         private async void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
