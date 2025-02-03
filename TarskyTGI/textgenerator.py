@@ -24,12 +24,12 @@ def continue_text(input_text):
     return output["choices"][0]["message"]["content"].strip()
     #return input_text
 
-def load_model(model_path):
+def load_model(model_path, layers):
     global model
     try:
         with open('chatstuff.json', 'r') as f:
             data = json.load(f)
-        model = llama_cpp.Llama(model_path=model_path, n_gpu_layers=data['layers'], chat_format=data['format'])
+        model = llama_cpp.Llama(model_path=model_path, n_gpu_layers=layers, chat_format=data['format'])
         print("$model_loaded$", flush=True)
     except Exception as e:
         print(f"$model_load_error$:{str(e)}", flush=True)
@@ -38,7 +38,8 @@ while True:
     cmd = input().strip()
     if cmd == "load":
         mod = input().strip()
-        load_model(mod)
+        layers = int(input().strip())
+        load_model(mod, layers)
     elif cmd == "chat":
         ch = input()
         if model is not None:

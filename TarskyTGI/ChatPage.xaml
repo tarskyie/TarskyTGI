@@ -33,7 +33,11 @@
         <!-- Side bar -->
         <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="2" VerticalAlignment="Top">
             <TextBlock x:Name="StatusTextBlock" Text="Not loaded."/>
-            <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click"/>
+            <!-- gpu layers and button in one row -->
+            <StackPanel Orientation="Horizontal">
+                <TextBox x:Name="gpuLayers" Width="85" PlaceholderText="GPU layers" Text="0"/>
+                <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click" />
+            </StackPanel>
             <TextBox x:Name="ModelBox" Width="140" PlaceholderText="Model path" TextChanged="ModelBox_TextChanged"/>
             <Button x:Name="selectModelButton" Content="Select file" Click="selectModelButton_Click"/>
             <TextBox x:Name="ctxBox" Width="140" PlaceholderText="n_ctx" Text="1024" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>

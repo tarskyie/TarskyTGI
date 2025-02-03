@@ -79,16 +79,28 @@ namespace TarskyTGI
         private async void LoadModelButton_Click(object sender, RoutedEventArgs e)
         {
             //string modelPath = "C:/Users/ivany/Downloads/Phi-3.1-mini-4k-instruct-Q4_K_L.gguf";
+            int gpu_layers = 0;
+            try
+            {
+                gpu_layers = int.Parse(gpuLayers.Text);
+            }
+            catch
+            {
+                StatusTextBlock.Text = "Please enter a valid number of GPU layers.";
+                return;
+            }
+            
             string modelPath = ModelBox.Text;
-            await LoadModel(modelPath);
+            await LoadModel(modelPath, gpu_layers);
         }
 
-        private async Task LoadModel(string modelPath)
+        private async Task LoadModel(string modelPath, int gpu_l)
         {
             StatusTextBlock.Text = "Loading model...";
             //TODO exceptions
             await pythonInput.WriteLineAsync("load");
             await pythonInput.WriteLineAsync(modelPath);
+            await pythonInput.WriteLineAsync(gpu_l.ToString());
             await pythonInput.FlushAsync();
 
             string response = await pythonOutput.ReadLineAsync();
