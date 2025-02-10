@@ -38,8 +38,18 @@
                 <TextBox x:Name="gpuLayers" Width="85" PlaceholderText="GPU layers" Text="0"/>
                 <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click" />
             </StackPanel>
+            <TextBox x:Name="ChatFormatBox" Width="140" PlaceholderText="Chat format" Text="llama-3"/>
             <TextBox x:Name="ModelBox" Width="140" PlaceholderText="Model path" TextChanged="ModelBox_TextChanged"/>
             <Button x:Name="selectModelButton" Content="Select file" Click="selectModelButton_Click"/>
+            <!-- drop down for levels of priority of the python process -->
+            <ComboBox x:Name="priorityBox" Width="140" PlaceholderText="Priority" SelectionChanged="priorityBox_SelectionChanged" SelectedIndex="2">
+                <ComboBoxItem Content="Idle"/>
+                <ComboBoxItem Content="BelowNormal"/>
+                <ComboBoxItem Content="Normal"/>
+                <ComboBoxItem Content="AboveNormal"/>
+                <ComboBoxItem Content="High"/>
+                <ComboBoxItem Content="RealTime"/>
+            </ComboBox>
             <TextBox x:Name="ctxBox" Width="140" PlaceholderText="n_ctx" Text="1024" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
             <TextBox x:Name="predictBox" Width="140" PlaceholderText="n_predict" Text="128" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
             <TextBox x:Name="temperatureBox" Width="140" PlaceholderText="temperature" Text="0.8" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>

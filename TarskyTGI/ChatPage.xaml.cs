@@ -74,6 +74,7 @@ namespace TarskyTGI
             pythonProcess.Start();
             pythonInput = pythonProcess.StandardInput;
             pythonOutput = pythonProcess.StandardOutput;
+            pythonProcess.PriorityClass = ProcessPriorityClass.Normal;
         }
 
         private async void LoadModelButton_Click(object sender, RoutedEventArgs e)
@@ -101,6 +102,7 @@ namespace TarskyTGI
             await pythonInput.WriteLineAsync("load");
             await pythonInput.WriteLineAsync(modelPath);
             await pythonInput.WriteLineAsync(gpu_l.ToString());
+            await pythonInput.WriteLineAsync(ChatFormatBox.Text);
             await pythonInput.FlushAsync();
 
             string response = await pythonOutput.ReadLineAsync();
@@ -178,12 +180,6 @@ namespace TarskyTGI
             //return inputText;
         }
 
-        string GetListBoxItemsAsNewlineSeparatedString(ListBox listBox)
-        {
-            return string.Join("",listBox.Items.Cast<object>().Select(item => item.ToString()));
-            //return string.Join("\\n", listBox.Items.Cast<object>().Select(item => item.ToString()));
-        }
-
         //Additional SideBar stuff
         private void ModelBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -223,6 +219,37 @@ namespace TarskyTGI
             if (file != null)
             {
                 ModelBox.Text = file.Path;
+            }
+        }
+
+        private void priorityBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (pythonProcess != null)
+            {
+                if (priorityBox.SelectedIndex == 0)
+                {
+                    pythonProcess.PriorityClass = ProcessPriorityClass.Idle;
+                }
+                else if (priorityBox.SelectedIndex == 1)
+                {
+                    pythonProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
+                }
+                else if (priorityBox.SelectedIndex == 2)
+                {
+                    pythonProcess.PriorityClass = ProcessPriorityClass.Normal;
+                }
+                else if (priorityBox.SelectedIndex == 3)
+                {
+                    pythonProcess.PriorityClass = ProcessPriorityClass.AboveNormal;
+                }
+                else if (priorityBox.SelectedIndex == 4)
+                {
+                    pythonProcess.PriorityClass = ProcessPriorityClass.High;
+                }
+                else
+                {
+                    pythonProcess.PriorityClass = ProcessPriorityClass.RealTime;
+                }
             }
         }
     }
