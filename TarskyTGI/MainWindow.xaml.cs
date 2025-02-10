@@ -1,61 +1,86 @@
+using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using Windows.UI.ViewManagement;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Data.Pdf;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using System.Threading.Tasks;
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
 
 namespace TarskyTGI
 {
-    /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class MainWindow : Window
     {
+        private readonly string[] processNames = { "python", "WebView2" };
+        private readonly Dictionary<string, Type> navigationMap = new()
+            {
+                { "ChatApp", typeof(ChatPage) },
+                { "InstructApp", typeof(InstructPage) },
+                { "BaseApp", typeof(BasePage) },
+                { "HostApp", typeof(HostPage) },
+                { "HomeApp", typeof(HomePage) },
+                { "hfPage", typeof(hfPage) },
+                { "dwnlds", typeof(downloadsPage) }
+            };
+
+        private SystemBackdropConfiguration backdropConfiguration;
+        private MicaController micaController;
+
         public MainWindow()
         {
+            //TrySetMicaBackdrop();
             this.InitializeComponent();
+            this.Activated += MainWindow_Activated;
+            ExtendsContentIntoTitleBar = true;
+            SetTitleBar(AppTitleBar);
             ContentFrame.Navigate(typeof(HomePage));
         }
-        private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+
+        // ...
+
+        private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
         {
-            if (args.SelectedItemContainer != null)
+            IntPtr windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            WindowId windowId = Win32Interop.GetWindowIdFromWindow(windowHandle);
+            AppWindow appWindow = AppWindow.GetFromWindowId(windowId); 
+            appWindow.SetIcon(@"Assets\icon.ico");
+        }
+
+        private async void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        {
+            
+            if (args.SelectedItemContainer != null && navigationMap.TryGetValue(args.SelectedItemContainer.Tag.ToString(), out Type pageType))
             {
-                switch (args.SelectedItemContainer.Tag.ToString())
+                await TerminateProcessesAsync();
+                ContentFrame.IsEnabled = false;
+                ContentFrame.IsEnabled = true;
+                ContentFrame.Navigate(pageType);
+            }
+        }
+
+        private async Task TerminateProcessesAsync()
+        {
+            foreach (string processName in processNames)
+            {
+                Process[] processes = Process.GetProcesses();
+
+                foreach (Process process in processes.Where(p => p.ProcessName.Contains(processName, StringComparison.OrdinalIgnoreCase)))
                 {
-                    case "ChatApp":
-                        ContentFrame.Navigate(typeof(ChatPage));
-                        break;
-                    case "InstructApp":
-                        ContentFrame.Navigate(typeof(InstructPage));
-                        break;
-                    case "BaseApp":
-                        ContentFrame.Navigate(typeof(BasePage));
-                        break;
-                    case "HostApp":
-                        ContentFrame.Navigate(typeof(HostPage));
-                        break;
-                    case "HomeApp":
-                        ContentFrame.Navigate(typeof(HomePage));
-                        break;
-                    case "hfPage":
-                        ContentFrame.Navigate(typeof(hfPage));
-                        break;
-                    case "dwnlds":
-                        ContentFrame.Navigate(typeof(downloadsPage));
-                        break;
+                    try
+                    {
+                        await Task.Run(() => process.Kill());
+                        Console.WriteLine($"Terminated process: {process.ProcessName}, PID: {process.Id}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to terminate process: {process.ProcessName}, PID: {process.Id}, Error: {ex.Message}");
+                    }
                 }
             }
         }

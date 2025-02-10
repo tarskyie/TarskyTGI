@@ -21,20 +21,15 @@ using Windows.Storage.Pickers;
 using Windows.Storage;
 using WinRT.Interop;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace TarskyTGI
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class ChatPage : Page
     {
         private Process pythonProcess;
         private StreamWriter pythonInput;
         private StreamReader pythonOutput;
         private bool modelLoaded = false;
+        private string imgPath = null;
 
         public ChatPage()
         {
@@ -74,26 +69,53 @@ namespace TarskyTGI
             pythonProcess.Start();
             pythonInput = pythonProcess.StandardInput;
             pythonOutput = pythonProcess.StandardOutput;
+            pythonProcess.PriorityClass = ProcessPriorityClass.Normal;
         }
 
         private async void LoadModelButton_Click(object sender, RoutedEventArgs e)
         {
-            //string modelPath = "C:/Users/ivany/Downloads/Phi-3.1-mini-4k-instruct-Q4_K_L.gguf";
+            int gpu_layers = 0;
+            try
+            {
+                gpu_layers = int.Parse(gpuLayers.Text);
+            }
+            catch
+            {
+                StatusTextBlock.Text = "Please enter a valid number of GPU layers.";
+                return;
+            }
+            
             string modelPath = ModelBox.Text;
-            await LoadModel(modelPath);
+            await LoadModel(modelPath, gpu_layers);
         }
 
-        private async Task LoadModel(string modelPath)
+        private async Task LoadModel(string modelPath, int gpu_l)
         {
+            StatusTextBlock.Text = "Loading model...";
+            //TODO exceptions
             await pythonInput.WriteLineAsync("load");
             await pythonInput.WriteLineAsync(modelPath);
+            await pythonInput.WriteLineAsync(gpu_l.ToString());
+            await pythonInput.WriteLineAsync(ChatFormatBox.Text);
+            //TODO image upload
+            if (imgPath != null)
+            {
+                await pythonInput.WriteLineAsync("yes");
+                uploadStatus.Text = "No image uploaded.";
+                imgPath = null;
+            }
+            else
+            {
+                await pythonInput.WriteLineAsync("no");
+            }
             await pythonInput.FlushAsync();
 
             string response = await pythonOutput.ReadLineAsync();
+            
             if (response.StartsWith("$model_loaded$"))
             {
                 modelLoaded = true;
-                StatusTextBlock.Text = "LOADED.";
+                StatusTextBlock.Text = "Ready.";
             }
             else if (response.StartsWith("$model_load_error$"))
             {
@@ -102,29 +124,33 @@ namespace TarskyTGI
             }
         }
 
-        private void ClearFN(object sender, RoutedEventArgs e)
+        private async void ClearFN(object sender, RoutedEventArgs e)
         {
+            await pythonInput.WriteLineAsync("clear");
+            await pythonInput.FlushAsync();
+
             ChatHistory.Items.Clear();
         }
         private async void SendFN(object sender, RoutedEventArgs e)
         {
             if (PromptBox.Text.Trim() != string.Empty)
             {
-                ChatHistory.Items.Add("User: "+PromptBox.Text.Trim());
+                ChatHistory.Items.Add(PromptBox.Text.Trim());
+                StatusTextBlock.Text = "Generating response...";
                 if (!modelLoaded)
                 {
                     StatusTextBlock.Text = "Please load a model first.";
                     return;
                 }
-
+                
                 string inputText = PromptBox.Text.Trim();
-                string itemsAsString = GetListBoxItemsAsNewlineSeparatedString(ChatHistory);
-                string generatedText = await GenerateText(itemsAsString+"\\nUser: "+inputText+"\\nAssistant: ");
+                PromptBox.Text = string.Empty;
+                string generatedText = await GenerateText(inputText);
                 string outputString = generatedText.Replace("\\n", "\n");
                 //string outputString = generatedText;
-                ChatHistory.Items.Add("Assistant:"+outputString);
+                StatusTextBlock.Text = "Ready.";
+                ChatHistory.Items.Add(outputString);
             }
-            PromptBox.Text = string.Empty;
         }
         private void PromptBox_KeyDown(object sender, KeyRoutedEventArgs e)
         {
@@ -154,28 +180,7 @@ namespace TarskyTGI
             {
                 return $"Error: {response.Substring(response.IndexOf(':') + 1)}";
             }
-            //return "Unknown error occurred.";
             return response;
-        }
-
-        string GetListBoxItemsAsNewlineSeparatedString(ListBox listBox)
-        {
-            return string.Join("\\n", listBox.Items.Cast<object>().Select(item => item.ToString()));
-        }
-
-        private async void Window_Closed(object sender, WindowEventArgs args)
-        {
-            if (pythonProcess != null && !pythonProcess.HasExited)
-            {
-                await pythonInput.WriteLineAsync("exit");
-                await pythonInput.FlushAsync();
-                pythonProcess.WaitForExit(1000);
-                if (!pythonProcess.HasExited)
-                {
-                    pythonProcess.Kill();
-                }
-                pythonProcess.Dispose();
-            }
         }
 
         //Additional SideBar stuff
@@ -183,9 +188,7 @@ namespace TarskyTGI
         {
             try
             {
-                //float check = float.Parse(temperatureBox.Text.Replace('.', ','));
-                var chatClass = new ChatClass(ModelBox.Text.Trim(), int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')));
-                //ChatClass chatClass = new ChatClass("aaaa", 1028, 128);
+                var chatClass = new ChatClass(ModelBox.Text.Trim(), "chatml", int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')), 35);
 
                 string jsonString = JsonSerializer.Serialize(chatClass);
 
@@ -217,6 +220,58 @@ namespace TarskyTGI
             if (file != null)
             {
                 ModelBox.Text = file.Path;
+            }
+        }
+
+        private async void uploadButton_Click(object sender, RoutedEventArgs e)
+        {
+            // open a file selection dialog and get the path of the image
+            var picker = new FileOpenPicker();
+            var hwnd = WindowNative.GetWindowHandle(App.m_window);
+            InitializeWithWindow.Initialize(picker, hwnd);
+
+            picker.ViewMode = PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = PickerLocationId.Desktop;
+            picker.FileTypeFilter.Add(".png");
+            picker.FileTypeFilter.Add(".jpg");
+            picker.FileTypeFilter.Add(".jpeg");
+
+            StorageFile file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                uploadStatus.Text = "Picked " + file.Path;
+                imgPath = file.Path;
+            }
+        }
+
+        private void priorityBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (pythonProcess != null)
+            {
+                if (priorityBox.SelectedIndex == 0)
+                {
+                    pythonProcess.PriorityClass = ProcessPriorityClass.Idle;
+                }
+                else if (priorityBox.SelectedIndex == 1)
+                {
+                    pythonProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
+                }
+                else if (priorityBox.SelectedIndex == 2)
+                {
+                    pythonProcess.PriorityClass = ProcessPriorityClass.Normal;
+                }
+                else if (priorityBox.SelectedIndex == 3)
+                {
+                    pythonProcess.PriorityClass = ProcessPriorityClass.AboveNormal;
+                }
+                else if (priorityBox.SelectedIndex == 4)
+                {
+                    pythonProcess.PriorityClass = ProcessPriorityClass.High;
+                }
+                else
+                {
+                    pythonProcess.PriorityClass = ProcessPriorityClass.RealTime;
+                }
             }
         }
     }

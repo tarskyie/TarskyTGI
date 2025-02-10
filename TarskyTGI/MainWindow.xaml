@@ -16,15 +16,31 @@
     </Window.SystemBackdrop>
 
     <Grid>
-        <!-- Your UI elements go here -->
-        <muxc:NavigationView PaneDisplayMode="Left" SelectionChanged="NavigationView_SelectionChanged">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="32"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="AppTitleBar">
+            <Image Source="Assets/icon.png"
+                   HorizontalAlignment="Left" 
+                   Width="16" Height="16" 
+                   Margin="8,0"/>
+            <TextBlock x:Name="AppTitleTextBlock" Text="TarskyTGI"
+                       TextWrapping="NoWrap"
+                       Style="{StaticResource CaptionTextBlockStyle}" 
+                       VerticalAlignment="Center"
+                       Margin="28,0,0,0"/>
+        </Grid>
+        
+        <muxc:NavigationView PaneDisplayMode="Left" SelectionChanged="NavigationView_SelectionChanged" Grid.Row="1">
             <muxc:NavigationView.MenuItems>
                 <muxc:NavigationViewItem Content="Home" Icon="Home" Tag="HomeApp"/>
                 <muxc:NavigationViewItem Content="HuggingFace" Icon="Emoji" Tag="hfPage"/>
                 <muxc:NavigationViewItem Content="Downloads" Icon="Download" Tag="dwnlds"/>
                 <muxc:NavigationViewItem Content="Chat" Icon="Message" Tag="ChatApp"/>
                 <muxc:NavigationViewItem Content="Instruct" Icon="Play" Tag="InstructApp"/>
-                <muxc:NavigationViewItem Content="Base" Icon="Page" Tag="BaseApp"/>
+                <muxc:NavigationViewItem Content="Base" Icon="Edit" Tag="BaseApp"/>
                 <muxc:NavigationViewItem Content="Host" Icon="Globe" Tag="HostApp"/>
             </muxc:NavigationView.MenuItems>
             <Frame x:Name="ContentFrame"/>

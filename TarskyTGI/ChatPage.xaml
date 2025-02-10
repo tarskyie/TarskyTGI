@@ -10,7 +10,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <!--define rows and columns-->
+        <!-- Define rows and columns -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="70"/>
@@ -21,30 +21,47 @@
             <RowDefinition Height="55"/>
         </Grid.RowDefinitions>
 
-        <!--Chat interface done with listbox-->
+        <!-- Chat interface done with listbox -->
         <ListBox Grid.Row="0" x:Name="ChatHistory">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                    <TextBox Text="{Binding}" TextWrapping="Wrap" IsReadOnly="True"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <!--Side bar-->
+        <!-- Side bar -->
         <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="2" VerticalAlignment="Top">
-            <TextBlock x:Name="StatusTextBlock" Text="Not loaded"/>
-            <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click"/>
+            <TextBlock x:Name="StatusTextBlock" Text="Not loaded."/>
+            <!-- gpu layers and button in one row -->
+            <StackPanel Orientation="Horizontal">
+                <TextBox x:Name="gpuLayers" Width="85" PlaceholderText="GPU layers" Text="0"/>
+                <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click" />
+            </StackPanel>
+            <TextBox x:Name="ChatFormatBox" Width="140" PlaceholderText="Chat format" Text="llama-3"/>
             <TextBox x:Name="ModelBox" Width="140" PlaceholderText="Model path" TextChanged="ModelBox_TextChanged"/>
             <Button x:Name="selectModelButton" Content="Select file" Click="selectModelButton_Click"/>
+            <!-- drop down for levels of priority of the python process -->
+            <ComboBox x:Name="priorityBox" Width="140" PlaceholderText="Priority" SelectionChanged="priorityBox_SelectionChanged" SelectedIndex="2">
+                <ComboBoxItem Content="Idle"/>
+                <ComboBoxItem Content="BelowNormal"/>
+                <ComboBoxItem Content="Normal"/>
+                <ComboBoxItem Content="AboveNormal"/>
+                <ComboBoxItem Content="High"/>
+                <ComboBoxItem Content="RealTime"/>
+            </ComboBox>
             <TextBox x:Name="ctxBox" Width="140" PlaceholderText="n_ctx" Text="1024" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
             <TextBox x:Name="predictBox" Width="140" PlaceholderText="n_predict" Text="128" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
             <TextBox x:Name="temperatureBox" Width="140" PlaceholderText="temperature" Text="0.8" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
             <TextBox x:Name="toppBox" Width="140" PlaceholderText="top_p" Text="0.95" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
             <TextBox x:Name="minpBox" Width="140" PlaceholderText="min_p" Text="0.05" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
             <TextBox x:Name="typicalpBox" Width="140" PlaceholderText="typical_p" Text="1" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
+            <TextBlock Text="Image Upload"/>
+            <TextBlock x:Name="uploadStatus" Text="No image uploaded."/>
+            <Button x:Name="uploadButton" Content="Upload" Click="uploadButton_Click"/>
         </StackPanel>
 
-        <!--Bottom stuff-->
+        <!-- Bottom stuff -->
         <TextBox PlaceholderText="Your prompt here. Shift+Enter to newline."
              PreviewKeyDown="PromptBox_KeyDown"
              Height="50" 

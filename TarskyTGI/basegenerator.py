@@ -20,7 +20,7 @@ def continue_text(input_text):
 def load_model(model_path):
     global model
     try:
-        model = llama_cpp.Llama(model_path=model_path)
+        model = llama_cpp.Llama(model_path=model_path, n_gpu_layers=30)
         print("$model_loaded$", flush=True)
     except Exception as e:
         print(f"$model_load_error$:{str(e)}", flush=True)

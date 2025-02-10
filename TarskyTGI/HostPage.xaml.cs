@@ -142,7 +142,7 @@ namespace TarskyTGI
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "python",
+                    FileName = "py",
                     Arguments = "basegenerator.py",
                     UseShellExecute = false,
                     RedirectStandardInput = true,
