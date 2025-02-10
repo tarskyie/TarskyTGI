@@ -21,20 +21,15 @@ using Windows.Storage.Pickers;
 using Windows.Storage;
 using WinRT.Interop;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace TarskyTGI
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class ChatPage : Page
     {
         private Process pythonProcess;
         private StreamWriter pythonInput;
         private StreamReader pythonOutput;
         private bool modelLoaded = false;
+        private string imgPath = null;
 
         public ChatPage()
         {
@@ -62,7 +57,7 @@ namespace TarskyTGI
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "py",
+                    FileName = "python",
                     Arguments = "textgenerator.py",
                     UseShellExecute = false,
                     RedirectStandardInput = true,
@@ -79,7 +74,6 @@ namespace TarskyTGI
 
         private async void LoadModelButton_Click(object sender, RoutedEventArgs e)
         {
-            //string modelPath = "C:/Users/ivany/Downloads/Phi-3.1-mini-4k-instruct-Q4_K_L.gguf";
             int gpu_layers = 0;
             try
             {
@@ -103,6 +97,17 @@ namespace TarskyTGI
             await pythonInput.WriteLineAsync(modelPath);
             await pythonInput.WriteLineAsync(gpu_l.ToString());
             await pythonInput.WriteLineAsync(ChatFormatBox.Text);
+            //TODO image upload
+            if (imgPath != null)
+            {
+                await pythonInput.WriteLineAsync("yes");
+                uploadStatus.Text = "No image uploaded.";
+                imgPath = null;
+            }
+            else
+            {
+                await pythonInput.WriteLineAsync("no");
+            }
             await pythonInput.FlushAsync();
 
             string response = await pythonOutput.ReadLineAsync();
@@ -175,9 +180,7 @@ namespace TarskyTGI
             {
                 return $"Error: {response.Substring(response.IndexOf(':') + 1)}";
             }
-            //return "Unknown error occurred.";
             return response;
-            //return inputText;
         }
 
         //Additional SideBar stuff
@@ -185,9 +188,7 @@ namespace TarskyTGI
         {
             try
             {
-                //float check = float.Parse(temperatureBox.Text.Replace('.', ','));
                 var chatClass = new ChatClass(ModelBox.Text.Trim(), "chatml", int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')), 35);
-                //ChatClass chatClass = new ChatClass("aaaa", 1028, 128);
 
                 string jsonString = JsonSerializer.Serialize(chatClass);
 
@@ -219,6 +220,27 @@ namespace TarskyTGI
             if (file != null)
             {
                 ModelBox.Text = file.Path;
+            }
+        }
+
+        private async void uploadButton_Click(object sender, RoutedEventArgs e)
+        {
+            // open a file selection dialog and get the path of the image
+            var picker = new FileOpenPicker();
+            var hwnd = WindowNative.GetWindowHandle(App.m_window);
+            InitializeWithWindow.Initialize(picker, hwnd);
+
+            picker.ViewMode = PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = PickerLocationId.Desktop;
+            picker.FileTypeFilter.Add(".png");
+            picker.FileTypeFilter.Add(".jpg");
+            picker.FileTypeFilter.Add(".jpeg");
+
+            StorageFile file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                uploadStatus.Text = "Picked " + file.Path;
+                imgPath = file.Path;
             }
         }
 
