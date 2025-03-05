@@ -88,6 +88,9 @@
     <None Update="instruct.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="llavagenerator.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Page Update="HostPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

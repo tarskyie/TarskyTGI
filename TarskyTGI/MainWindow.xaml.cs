@@ -21,6 +21,7 @@ namespace TarskyTGI
         private readonly Dictionary<string, Type> navigationMap = new()
             {
                 { "ChatApp", typeof(ChatPage) },
+                { "LlavaApp", typeof(LlavaPage) },
                 { "InstructApp", typeof(InstructPage) },
                 { "BaseApp", typeof(BasePage) },
                 { "HostApp", typeof(HostPage) },
