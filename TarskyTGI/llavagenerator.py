@@ -27,7 +27,7 @@ def continue_text(input_text, img):
     typical_p = data['typical_p']
 
     message = input_text
-    if img != None:
+    if img != "None":
         data_uri = image_to_base64_data_uri(img)
         msgs.append({"role": "user", "content": [{"type":"text", "text":message}, {"type": "image_url", "image_url": {"url": data_uri } }]})
     else:

@@ -140,6 +140,8 @@ namespace TarskyTGI
                 string outputString = generatedText.Replace("\\n", "\n");
                 StatusTextBlock.Text = "Ready.";
                 ChatHistory.Items.Add(outputString);
+                imgPath = null;
+                uploadStatus.Text = "No image uploaded.";
             }
         }
         private void PromptBox_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -155,7 +157,7 @@ namespace TarskyTGI
         {
             await pythonInput.WriteLineAsync("chat");
             await pythonInput.WriteLineAsync(inputText);
-            await pythonInput.WriteLineAsync(imgPath ?? ""); // Передача пути к изображению, если он есть
+            await pythonInput.WriteLineAsync(imgPath ?? "None"); // Передача пути к изображению, если он есть
             await pythonInput.FlushAsync();
 
             string response = await pythonOutput.ReadLineAsync();
@@ -211,6 +213,24 @@ namespace TarskyTGI
             if (file != null)
             {
                 ModelBox.Text = file.Path;
+            }
+        }
+
+        private async void selectMmprojButton_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new FileOpenPicker();
+            var hwnd = WindowNative.GetWindowHandle(App.m_window);
+            InitializeWithWindow.Initialize(picker, hwnd);
+
+            picker.ViewMode = PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = PickerLocationId.Desktop;
+            picker.FileTypeFilter.Add(".gguf");
+            picker.FileTypeFilter.Add(".bin");
+
+            StorageFile file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                MmprojBox.Text = file.Path;
             }
         }
 

@@ -49,7 +49,11 @@
             </ComboBox>
             <TextBox x:Name="ModelBox" Width="140" PlaceholderText="Model path" TextChanged="ModelBox_TextChanged"/>
             <TextBox x:Name="MmprojBox" Width="140" PlaceholderText="mmproj file path"/>
-            <Button x:Name="selectModelButton" Content="Select file" Click="selectModelButton_Click"/>
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="selectModelButton" Content="Select file" Click="selectModelButton_Click"/>
+                <Button x:Name="selectMmprojButton" Content="Select file" Click="selectMmprojButton_Click"/>
+            </StackPanel>
+            
             <!-- drop down for levels of priority of the python process -->
             <ComboBox x:Name="priorityBox" Width="140" PlaceholderText="Priority" SelectionChanged="priorityBox_SelectionChanged" SelectedIndex="2">
                 <ComboBoxItem Content="Idle"/>
