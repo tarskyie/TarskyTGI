@@ -31,6 +31,10 @@ namespace TarskyTGI
         {
             InstallDependency("pip install llama-cpp-python -C cmake.args=\"-DGGML_VULKAN=on\"");
         }
+        private void InstallLlamaCppPythonServer_Click(object sender, RoutedEventArgs e)
+        {
+            InstallDependency("pip install 'llama-cpp-python[server]'");
+        }
 
         private void NavigateToChatPage_Click(object sender, RoutedEventArgs e)
         {

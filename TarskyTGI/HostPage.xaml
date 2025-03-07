@@ -10,18 +10,37 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <TextBlock x:Name="StatusTextBlock" 
-                   VerticalAlignment="Center" 
-                   HorizontalAlignment="Center" 
-                   TextWrapping="Wrap" 
-                   FontSize="24"
-                   Text="Offline"/>
-        <StackPanel>
-            <Button Content="Start hosting"
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0">
+            <Button Content="Start server"
                 Click="Button_StartServer_Click"/>
-            <Button Content="Stop hosting"
+            <Button Content="Stop server"
                 Click="Button_StopServer_Click"/>
+            <TextBlock x:Name="StatusTextBlock" 
+               VerticalAlignment="Center" 
+               HorizontalAlignment="Center" 
+               TextWrapping="Wrap" 
+               Text="Offline"/>
         </StackPanel>
-        
+
+        <StackPanel Grid.Column="1">
+            <Button Content="Start hosting OpenAI API"
+                Click="Button_StartOpenAIServer_Click"/>
+            <Button Content="Stop hosting"/>
+            <TextBox x:Name="ModelTextBox" 
+                PlaceholderText="model path"/>
+            <TextBox x:Name="PortTextBox" 
+                PlaceholderText="port"/>
+            <TextBlock x:Name="StatusOpenAITextBlock" 
+               VerticalAlignment="Center" 
+               HorizontalAlignment="Center" 
+               TextWrapping="Wrap" 
+               Text="Offline"/>
+
+        </StackPanel>
+
     </Grid>
 </Page>

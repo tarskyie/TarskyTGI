@@ -36,7 +36,7 @@ namespace TarskyTGI
         private StreamReader pythonOutput;
         private bool modelLoaded = false;
 
-        private const int Port = 5000; // Change this to your desired port
+        private const int Port = 5000; 
         private TcpListener _listener;
         public HostPage()
         {
@@ -67,7 +67,6 @@ namespace TarskyTGI
                 StatusTextBlock.Text = "Server is already running.";
             }
         }
-
 
         private async Task AcceptClients()
         {
@@ -121,6 +120,27 @@ namespace TarskyTGI
         private void Button_StopServer_Click(object sender, RoutedEventArgs e)
         {
             StopServer();
+        }
+
+        private void Button_StartOpenAIServer_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = $"/c python -m llama_cpp.server --model {ModelTextBox.Text} --port {PortTextBox.Text}",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                StatusOpenAITextBlock.Text = "open";
+            }
+            catch (Exception ex)
+            {
+                StatusOpenAITextBlock.Text = ex.Message;
+            }
         }
 
         private void StopServer()

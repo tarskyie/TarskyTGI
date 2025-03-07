@@ -42,7 +42,7 @@
                 <muxc:NavigationViewItem Content="Llava" Icon="View" Tag="LlavaApp"/>
                 <muxc:NavigationViewItem Content="Instruct" Icon="Play" Tag="InstructApp"/>
                 <muxc:NavigationViewItem Content="Base" Icon="Edit" Tag="BaseApp"/>
-                <muxc:NavigationViewItem Content="Host" Icon="Globe" Tag="HostApp"/>
+                <muxc:NavigationViewItem Content="Server" Icon="Globe" Tag="HostApp"/>
             </muxc:NavigationView.MenuItems>
             <Frame x:Name="ContentFrame"/>
         </muxc:NavigationView>
