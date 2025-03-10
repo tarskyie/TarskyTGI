@@ -29,7 +29,6 @@ namespace TarskyTGI
         private StreamWriter pythonInput;
         private StreamReader pythonOutput;
         private bool modelLoaded = false;
-        private string imgPath = null;
 
         public ChatPage()
         {
@@ -97,17 +96,6 @@ namespace TarskyTGI
             await pythonInput.WriteLineAsync(modelPath);
             await pythonInput.WriteLineAsync(gpu_l.ToString());
             await pythonInput.WriteLineAsync(ChatFormatBox.Text);
-            //TODO image upload
-            if (imgPath != null)
-            {
-                await pythonInput.WriteLineAsync("yes");
-                uploadStatus.Text = "No image uploaded.";
-                imgPath = null;
-            }
-            else
-            {
-                await pythonInput.WriteLineAsync("no");
-            }
             await pythonInput.FlushAsync();
 
             string response = await pythonOutput.ReadLineAsync();
@@ -220,27 +208,6 @@ namespace TarskyTGI
             if (file != null)
             {
                 ModelBox.Text = file.Path;
-            }
-        }
-
-        private async void uploadButton_Click(object sender, RoutedEventArgs e)
-        {
-            // open a file selection dialog and get the path of the image
-            var picker = new FileOpenPicker();
-            var hwnd = WindowNative.GetWindowHandle(App.m_window);
-            InitializeWithWindow.Initialize(picker, hwnd);
-
-            picker.ViewMode = PickerViewMode.Thumbnail;
-            picker.SuggestedStartLocation = PickerLocationId.Desktop;
-            picker.FileTypeFilter.Add(".png");
-            picker.FileTypeFilter.Add(".jpg");
-            picker.FileTypeFilter.Add(".jpeg");
-
-            StorageFile file = await picker.PickSingleFileAsync();
-            if (file != null)
-            {
-                uploadStatus.Text = "Picked " + file.Path;
-                imgPath = file.Path;
             }
         }
 

@@ -42,7 +42,6 @@ while True:
         mod = input().strip()
         layers = int(input().strip())
         cformat = input().strip()
-        imagePresent = input().strip()
         load_model(mod, layers, cformat)
     elif cmd == "chat":
         ch = input()

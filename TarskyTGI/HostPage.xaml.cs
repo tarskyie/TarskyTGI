@@ -192,7 +192,6 @@ namespace TarskyTGI
         {
             loadJson();
             string modelPath = model;
-            //string modelPath = "C:\\Users\\tarsk\\Downloads\\Phi-3.5-mini-instruct-Q4_K_L.gguf";
             await LoadModel(modelPath);
         }
         private async Task LoadModel(string modelPath)

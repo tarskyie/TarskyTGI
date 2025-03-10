@@ -56,9 +56,6 @@
             <TextBox x:Name="toppBox" Width="140" PlaceholderText="top_p" Text="0.95" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
             <TextBox x:Name="minpBox" Width="140" PlaceholderText="min_p" Text="0.05" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
             <TextBox x:Name="typicalpBox" Width="140" PlaceholderText="typical_p" Text="1" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
-            <TextBlock Text="Image Upload"/>
-            <TextBlock x:Name="uploadStatus" Text="No image uploaded."/>
-            <Button x:Name="uploadButton" Content="Upload" Click="uploadButton_Click"/>
         </StackPanel>
 
         <!-- Bottom stuff -->
