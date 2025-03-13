@@ -135,7 +135,6 @@ namespace TarskyTGI
                 PromptBox.Text = string.Empty;
                 string generatedText = await GenerateText(inputText);
                 string outputString = generatedText.Replace("\\n", "\n");
-                //string outputString = generatedText;
                 StatusTextBlock.Text = "Ready.";
                 ChatHistory.Items.Add(outputString);
             }

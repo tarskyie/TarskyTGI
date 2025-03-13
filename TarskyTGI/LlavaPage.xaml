@@ -72,6 +72,7 @@
             <TextBlock Text="Image Upload"/>
             <TextBlock x:Name="uploadStatus" Text="No image uploaded."/>
             <Button x:Name="uploadButton" Content="Upload" Click="uploadButton_Click"/>
+            <Image Width="140"/>
         </StackPanel>
 
         <!-- Bottom stuff -->
@@ -86,7 +87,7 @@
              AcceptsReturn="True"
              />
 
-        <Button HorizontalAlignment="Stretch" Content="Send" Grid.Column="1" Grid.Row="1" Click="SendFN"/>
-        <Button HorizontalAlignment="Stretch" Content="Clear" Grid.Column="2" Grid.Row="1" Click="ClearFN"/>
+        <Button HorizontalAlignment="Stretch" Content="Send" Grid.Column="1" Grid.Row="1" Click="SendFN" Style="{StaticResource AccentButtonStyle}" />
+        <Button HorizontalAlignment="Stretch" Content="Clear" Grid.Column="2" Grid.Row="1" Click="ClearFN" />
     </Grid>
 </Page>

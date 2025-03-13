@@ -70,7 +70,7 @@
              AcceptsReturn="True"
              />
 
-        <Button HorizontalAlignment="Stretch" Content="Send" Grid.Column="1" Grid.Row="1" Click="SendFN"/>
+        <Button HorizontalAlignment="Stretch" Content="Send" Grid.Column="1" Grid.Row="1" Click="SendFN" Style="{StaticResource AccentButtonStyle}" />
         <Button HorizontalAlignment="Stretch" Content="Clear" Grid.Column="2" Grid.Row="1" Click="ClearFN"/>
     </Grid>
 </Page>
