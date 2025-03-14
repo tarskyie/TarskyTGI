@@ -29,8 +29,10 @@
             </StackPanel>
             <TextBlock x:Name="StatusTextBlock" Text="Not loaded" AutomationProperties.Name="Status Text"/>
             <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click" AutomationProperties.Name="Load Model Button"/>
-            <TextBox x:Name="ModelBox" Width="140" PlaceholderText="Model path" TextChanged="ModelBox_TextChanged" AutomationProperties.Name="Model Path TextBox"/>
-            <Button x:Name="selectModelButton" Content="Select file" Click="selectModelButton_Click" AutomationProperties.Name="Select File Button"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBox x:Name="ModelBox" Width="100" PlaceholderText="Model path" TextChanged="ModelBox_TextChanged"/>
+                <Button x:Name="selectModelButton" Content="📁" Click="selectModelButton_Click"/>
+            </StackPanel>
             <TextBox x:Name="ctxBox" Width="140" PlaceholderText="n_ctx" Text="1024" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged" AutomationProperties.Name="Context TextBox"/>
             <TextBox x:Name="predictBox" Width="140" PlaceholderText="n_predict" Text="128" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged" AutomationProperties.Name="Predict TextBox"/>
             <TextBox x:Name="temperatureBox" Width="140" PlaceholderText="temperature" Text="0.8" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged" AutomationProperties.Name="Temperature TextBox"/>

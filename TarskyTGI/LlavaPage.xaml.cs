@@ -141,6 +141,7 @@ namespace TarskyTGI
                 StatusTextBlock.Text = "Ready.";
                 ChatHistory.Items.Add(outputString);
                 imgPath = null;
+                imagePreview.Source = null;
                 uploadStatus.Text = "No image uploaded.";
             }
         }
@@ -252,6 +253,7 @@ namespace TarskyTGI
             {
                 uploadStatus.Text = "Picked " + file.Path;
                 imgPath = file.Path;
+                imagePreview.Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(new Uri(file.Path));
             }
         }
 

@@ -39,8 +39,10 @@
                 <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click" />
             </StackPanel>
             <TextBox x:Name="ChatFormatBox" Width="140" PlaceholderText="Chat format" Text="llama-3"/>
-            <TextBox x:Name="ModelBox" Width="140" PlaceholderText="Model path" TextChanged="ModelBox_TextChanged"/>
-            <Button x:Name="selectModelButton" Content="Select file" Click="selectModelButton_Click"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBox x:Name="ModelBox" Width="100" PlaceholderText="Model path" TextChanged="ModelBox_TextChanged"/>
+                <Button x:Name="selectModelButton" Content="📁" Click="selectModelButton_Click"/>
+            </StackPanel>
             <!-- drop down for levels of priority of the python process -->
             <ComboBox x:Name="priorityBox" Width="140" PlaceholderText="Priority" SelectionChanged="priorityBox_SelectionChanged" SelectedIndex="2">
                 <ComboBoxItem Content="Idle"/>
