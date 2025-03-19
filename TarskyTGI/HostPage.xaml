@@ -12,7 +12,6 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0">
             <Button Content="Start server"
@@ -24,22 +23,6 @@
                HorizontalAlignment="Center" 
                TextWrapping="Wrap" 
                Text="Offline"/>
-        </StackPanel>
-
-        <StackPanel Grid.Column="1">
-            <Button Content="Start hosting OpenAI API"
-                Click="Button_StartOpenAIServer_Click"/>
-            <Button Content="Stop hosting"/>
-            <TextBox x:Name="ModelTextBox" 
-                PlaceholderText="model path"/>
-            <TextBox x:Name="PortTextBox" 
-                PlaceholderText="port"/>
-            <TextBlock x:Name="StatusOpenAITextBlock" 
-               VerticalAlignment="Center" 
-               HorizontalAlignment="Center" 
-               TextWrapping="Wrap" 
-               Text="Offline"/>
-
         </StackPanel>
 
     </Grid>
