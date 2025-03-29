@@ -133,7 +133,7 @@ namespace TarskyTGI
             }
         }
 
-        //Text Gen ONLY 
+        // Text gen below
 
         private void InitializePythonProcess()
         {
@@ -211,7 +211,6 @@ namespace TarskyTGI
             {
                 return $"Error: {response.Substring(response.IndexOf(':') + 1)}";
             }
-            //return "Unknown error occurred.";
             return response;
         }
 
