@@ -133,8 +133,8 @@ namespace TarskyTGI
                 
                 string inputText = PromptBox.Text.Trim();
                 PromptBox.Text = string.Empty;
-                string generatedText = await GenerateText(inputText);
-                string outputString = generatedText.Replace("\\n", "\n");
+                string generatedText = await GenerateText(inputText.Replace("\r", "/[newline]"));
+                string outputString = generatedText.Replace("/[newline]", "\r");
                 StatusTextBlock.Text = "Ready.";
                 ChatHistory.Items.Add(outputString);
             }
@@ -175,7 +175,7 @@ namespace TarskyTGI
         {
             try
             {
-                var chatClass = new ChatClass(ModelBox.Text.Trim(), "chatml", int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')), 35);
+                var chatClass = new ChatClass(ModelBox.Text.Trim(), "chatml", int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text), float.Parse(toppBox.Text), float.Parse(minpBox.Text), float.Parse(typicalpBox.Text), int.Parse(gpuLayers.Text));
 
                 string jsonString = JsonSerializer.Serialize(chatClass);
 

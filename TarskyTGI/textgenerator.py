@@ -44,11 +44,11 @@ while True:
         cformat = input().strip()
         load_model(mod, layers, cformat)
     elif cmd == "chat":
-        ch = input()
+        ch = input().replace("/[newline]", "\n")
         if model is not None:
             try:
                 response = continue_text(ch)
-                response = response.replace("\n", "\\n")
+                response = response.replace("\n", "/[newline]")
                 print(f"$response$:{response}", flush=True)
             except Exception as e:
                 print(f"$error$:{str(e)}", flush=True)
