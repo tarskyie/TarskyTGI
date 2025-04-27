@@ -13,17 +13,17 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0">
-            <Button Content="Start server"
-                Click="Button_StartServer_Click"/>
-            <Button Content="Stop server"
-                Click="Button_StopServer_Click"/>
+        <StackPanel Grid.Column="0" Spacing="10" Padding="10">
+            <TextBlock Text="Enter Port:" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+            <TextBox x:Name="PortTextBox" Width="200" PlaceholderText="5000" Text="5000"/>
+            <TextBox x:Name="SystemPromptBox" Width="200" PlaceholderText="System prompt" Text="You are a helpful assistant."/>
+            <Button Content="Start server" Click="Button_StartServer_Click"/>
+            <Button Content="Stop server" Click="Button_StopServer_Click"/>
             <TextBlock x:Name="StatusTextBlock" 
-               VerticalAlignment="Center" 
-               HorizontalAlignment="Center" 
-               TextWrapping="Wrap" 
-               Text="Offline"/>
+                       VerticalAlignment="Center" 
+                       HorizontalAlignment="Center" 
+                       TextWrapping="Wrap" 
+                       Text="Offline"/>
         </StackPanel>
-
     </Grid>
 </Page>

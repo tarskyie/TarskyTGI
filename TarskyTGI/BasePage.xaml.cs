@@ -181,9 +181,7 @@ namespace TarskyTGI
         {
             try
             {
-                //float check = float.Parse(temperatureBox.Text.Replace('.', ','));
-                var chatClass = new ChatClass(ModelBox.Text.Trim(), "chatml", int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')), 35);
-                //ChatClass chatClass = new ChatClass("aaaa", 1028, 128);
+                var chatClass = new ChatClass(ModelBox.Text.Trim(), "chatml", int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text), float.Parse(toppBox.Text), float.Parse(minpBox.Text), float.Parse(typicalpBox.Text), 35);
 
                 string jsonString = JsonSerializer.Serialize(chatClass);
 

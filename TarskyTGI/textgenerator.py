@@ -54,6 +54,19 @@ while True:
                 print(f"$error$:{str(e)}", flush=True)
         else:
             print("$not_loaded$", flush=True)
+    elif cmd == "chat_server":
+        ch = input().replace("/[newline]", "\n")
+        sprompt = input()
+        msgs = [{"role":"system", "content":sprompt}]
+        if model is not None:
+            try:
+                response = continue_text(ch)
+                response = response.replace("\n", "/[newline]")
+                print(f"$response$:{response}", flush=True)
+            except Exception as e:
+                print(f"$error$:{str(e)}", flush=True)
+        else:
+            print("$not_loaded$", flush=True)
     elif cmd == "clear":
         msgs.clear()
         msgs.append({"role":"system", "content":"You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."})

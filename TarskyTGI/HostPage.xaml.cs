@@ -1,22 +1,11 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Net.Sockets;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using System.Text.Json;
+using System.Threading.Tasks;
 using System.Diagnostics;
 
 namespace TarskyTGI
@@ -24,6 +13,8 @@ namespace TarskyTGI
     public sealed partial class HostPage : Page
     {
         private string model;
+        private string chatFormat;
+        private int gpuLayers;
         private int ctxBox;
         private int predictBox;
         private float temperatureBox;
@@ -36,8 +27,8 @@ namespace TarskyTGI
         private StreamReader pythonOutput;
         private bool modelLoaded = false;
 
-        private const int Port = 5000; 
-        private TcpListener _listener;
+        private HttpListener _listener;
+
         public HostPage()
         {
             this.InitializeComponent();
@@ -48,16 +39,26 @@ namespace TarskyTGI
         {
             loadmodel1();
 
-            if (_listener == null || !_listener.Server.IsBound)
+            if (_listener == null || !_listener.IsListening)
             {
-                _listener = new TcpListener(IPAddress.Any, Port);
+                string portText = PortTextBox.Text;
+                if (!int.TryParse(portText, out int port) || port <= 0 || port > 65535)
+                {
+                    StatusTextBlock.Text = "Invalid port number. Please enter a value between 1 and 65535.";
+                    return;
+                }
+
+                string url = $"http://localhost:{port}/";
+                _listener = new HttpListener();
+                _listener.Prefixes.Add(url);
+
                 try
                 {
                     _listener.Start();
-                    StatusTextBlock.Text = $"Server started on port {Port}...";
-                    await AcceptClients();
+                    StatusTextBlock.Text = $"Server started at {url}...";
+                    await AcceptRequests();
                 }
-                catch (SocketException ex)
+                catch (HttpListenerException ex)
                 {
                     StatusTextBlock.Text = $"Error: {ex.Message}";
                 }
@@ -68,17 +69,17 @@ namespace TarskyTGI
             }
         }
 
-        private async Task AcceptClients()
+        private async Task AcceptRequests()
         {
             try
             {
-                while (true)
+                while (_listener.IsListening)
                 {
-                    var client = await _listener.AcceptTcpClientAsync();
-                    _ = HandleClientAsync(client);
+                    var context = await _listener.GetContextAsync();
+                    _ = HandleRequestAsync(context);
                 }
             }
-            catch (ObjectDisposedException)
+            catch (HttpListenerException)
             {
                 StatusTextBlock.Text = "Server stopped.";
             }
@@ -88,27 +89,38 @@ namespace TarskyTGI
             }
         }
 
-
-        private async Task HandleClientAsync(TcpClient client)
+        private async Task HandleRequestAsync(HttpListenerContext context)
         {
-            using (client)
-            {
-                var stream = client.GetStream();
-                byte[] buffer = new byte[1024];
-                int bytesRead;
+            var request = context.Request;
+            var response = context.Response;
 
-                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
+            try
+            {
+                using (var reader = new StreamReader(request.InputStream, request.ContentEncoding))
                 {
-                    string input = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    string input = await reader.ReadToEndAsync();
                     StatusTextBlock.Text = $"Received: {input}";
 
                     // Process input and create a response
-                    string generatedText = await GenerateText(input);
+                    string generatedText = await GenerateText(input.Replace("\r", "/[newline]"));
+                    generatedText = generatedText.Replace("/[newline]", "\r");
+                    string responseString = $"{generatedText}";
+                    byte[] responseBytes = Encoding.UTF8.GetBytes(responseString);
 
-                    string response = $"{generatedText}";
-                    byte[] responseBytes = Encoding.UTF8.GetBytes(response);
-                    await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+                    response.ContentType = "text/plain";
+                    response.ContentEncoding = Encoding.UTF8;
+                    response.ContentLength64 = responseBytes.Length;
+
+                    await response.OutputStream.WriteAsync(responseBytes, 0, responseBytes.Length);
                 }
+            }
+            catch (Exception ex)
+            {
+                StatusTextBlock.Text = $"Error: {ex.Message}";
+            }
+            finally
+            {
+                response.Close();
             }
         }
 
@@ -124,25 +136,24 @@ namespace TarskyTGI
 
         private void StopServer()
         {
-            if (_listener != null)
+            if (_listener != null && _listener.IsListening)
             {
                 _listener.Stop();
-                _listener.Server.Dispose();
+                _listener.Close();
                 StatusTextBlock.Text = "Server stopped.";
                 _listener = null;
             }
         }
 
-        // Text gen below
-
+        // Text generation and model loading methods
         private void InitializePythonProcess()
         {
             pythonProcess = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "py",
-                    Arguments = "basegenerator.py",
+                    FileName = "python",
+                    Arguments = "textgenerator.py",
                     UseShellExecute = false,
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
@@ -154,9 +165,10 @@ namespace TarskyTGI
             pythonInput = pythonProcess.StandardInput;
             pythonOutput = pythonProcess.StandardOutput;
         }
+
         private void loadJson()
         {
-            string jsonString = File.ReadAllText("basestuff.json");
+            string jsonString = File.ReadAllText("chatstuff.json");
             ChatClass jsonToLoad = JsonSerializer.Deserialize<ChatClass>(jsonString);
             model = jsonToLoad.model;
             ctxBox = jsonToLoad.n_ctx;
@@ -165,6 +177,8 @@ namespace TarskyTGI
             toppBox = jsonToLoad.top_p;
             minpBox = jsonToLoad.min_p;
             typicalpBox = jsonToLoad.typical_p;
+            gpuLayers = jsonToLoad.layers;
+            chatFormat = jsonToLoad.format;
         }
 
         private async void loadmodel1()
@@ -173,10 +187,15 @@ namespace TarskyTGI
             string modelPath = model;
             await LoadModel(modelPath);
         }
+
         private async Task LoadModel(string modelPath)
         {
+            StatusTextBlock.Text = "Loading model...";
+
             await pythonInput.WriteLineAsync("load");
             await pythonInput.WriteLineAsync(modelPath);
+            await pythonInput.WriteLineAsync(gpuLayers.ToString());
+            await pythonInput.WriteLineAsync(chatFormat);
             await pythonInput.FlushAsync();
 
             string response = await pythonOutput.ReadLineAsync();
@@ -189,13 +208,15 @@ namespace TarskyTGI
             {
                 modelLoaded = false;
                 StatusTextBlock.Text = $"Failed to load model: {response.Substring(response.IndexOf(':') + 1)}";
-                //StopServer();
+                StopServer();
             }
         }
+
         private async Task<string> GenerateText(string inputText)
         {
-            await pythonInput.WriteLineAsync("chat");
+            await pythonInput.WriteLineAsync("chat_server");
             await pythonInput.WriteLineAsync(inputText);
+            await pythonInput.WriteLineAsync(SystemPromptBox.Text);
             await pythonInput.FlushAsync();
 
             string response = await pythonOutput.ReadLineAsync();
@@ -213,6 +234,5 @@ namespace TarskyTGI
             }
             return response;
         }
-
     }
 }
