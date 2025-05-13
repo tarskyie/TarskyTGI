@@ -58,7 +58,7 @@ namespace TarskyTGI
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "python",
-                    Arguments = "llavagenerator.py", // Обновлено для использования llavagenerator.py
+                    Arguments = "llavagenerator.py", 
                     UseShellExecute = false,
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
@@ -97,8 +97,8 @@ namespace TarskyTGI
             await pythonInput.WriteLineAsync(modelPath);
             await pythonInput.WriteLineAsync(MmprojBox.Text);
             await pythonInput.WriteLineAsync(gpu_l.ToString());
-            await pythonInput.WriteLineAsync(ctxBox.Text); // Передача контекста
-            await pythonInput.WriteLineAsync(ChatFormatCombo.SelectedItem.ToString()); // Обновлено для использования выбранного формата чата
+            await pythonInput.WriteLineAsync(ctxBox.Text);
+            await pythonInput.WriteLineAsync(ChatFormatCombo.SelectedItem.ToString());
             await pythonInput.FlushAsync();
 
             string response = await pythonOutput.ReadLineAsync();
@@ -158,7 +158,7 @@ namespace TarskyTGI
         {
             await pythonInput.WriteLineAsync("chat");
             await pythonInput.WriteLineAsync(inputText);
-            await pythonInput.WriteLineAsync(imgPath ?? "None"); // Передача пути к изображению, если он есть
+            await pythonInput.WriteLineAsync(imgPath ?? "None"); 
             await pythonInput.FlushAsync();
 
             string response = await pythonOutput.ReadLineAsync();
@@ -182,7 +182,7 @@ namespace TarskyTGI
         {
             try
             {
-                var chatClass = new ChatClass(ModelBox.Text.Trim(), "chatml", int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text.Replace('.', ',')), float.Parse(toppBox.Text.Replace('.', ',')), float.Parse(minpBox.Text.Replace('.', ',')), float.Parse(typicalpBox.Text.Replace('.', ',')), 35);
+                var chatClass = new ChatClass(ModelBox.Text.Trim(), "chatml", int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text), float.Parse(toppBox.Text), float.Parse(minpBox.Text), float.Parse(typicalpBox.Text), int.Parse(ctxBox.Text));
 
                 string jsonString = JsonSerializer.Serialize(chatClass);
 

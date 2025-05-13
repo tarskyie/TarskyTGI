@@ -23,7 +23,7 @@ def continue_text(input_text):
     message = input_text
     msgs.append({"role": "user", "content": message})
 
-    output = model.create_chat_completion(messages=msgs, temperature=temperature, top_p=top_p, min_p=min_p, typical_p=typical_p)
+    output = model.create_chat_completion(messages=msgs, temperature=temperature, top_p=top_p, min_p=min_p, typical_p=typical_p, max_tokens=max_tokens)
     msgs.append({"role":"assistant", "content":output["choices"][0]["message"]["content"].strip()})
     return output["choices"][0]["message"]["content"].strip()
 
@@ -31,7 +31,8 @@ def load_model(model_path, layers, cformat):
     global model
     try:
         data = load_json()
-        model = llama_cpp.Llama(model_path=model_path, n_gpu_layers=layers, chat_format=cformat)
+        n_ctx = data['n_ctx']
+        model = llama_cpp.Llama(model_path=model_path, n_gpu_layers=layers, chat_format=cformat, n_ctx=n_ctx)
         print("$model_loaded$", flush=True)
     except Exception as e:
         print(f"$model_load_error$:{str(e)}", flush=True)
