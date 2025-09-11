@@ -30,10 +30,13 @@ namespace TarskyTGI
         private StreamReader pythonOutput;
         private bool modelLoaded = false;
 
+        private string sysPrompt = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.";
+
         public ChatPage()
         {
             this.InitializeComponent();
             InitializePythonProcess();
+            InsertSysPrompt();
             loadJson();
         }
 
@@ -69,6 +72,13 @@ namespace TarskyTGI
             pythonInput = pythonProcess.StandardInput;
             pythonOutput = pythonProcess.StandardOutput;
             pythonProcess.PriorityClass = ProcessPriorityClass.Normal;
+        }
+
+        private async Task InsertSysPrompt()
+        {
+            await pythonInput.WriteLineAsync("system");
+            await pythonInput.WriteLineAsync(sysPrompt);
+            await pythonInput.FlushAsync();
         }
 
         private async void LoadModelButton_Click(object sender, RoutedEventArgs e)
@@ -115,6 +125,9 @@ namespace TarskyTGI
         private async void ClearFN(object sender, RoutedEventArgs e)
         {
             await pythonInput.WriteLineAsync("clear");
+            await pythonInput.WriteLineAsync("append");
+            await pythonInput.WriteLineAsync("system");
+            await pythonInput.WriteLineAsync(sysPrompt);
             await pythonInput.FlushAsync();
 
             ChatHistory.Items.Clear();
