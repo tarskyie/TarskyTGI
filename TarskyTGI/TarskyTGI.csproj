@@ -35,6 +35,7 @@
     <None Remove="HomePage.xaml" />
     <None Remove="HostPage.xaml" />
     <None Remove="InstructPage.xaml" />
+    <None Remove="Pages\HostPage.xaml" />
   </ItemGroup> 
 
   <ItemGroup>
@@ -73,13 +74,16 @@
     <Page Update="BasePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Update="Pages\HostPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <None Update="server.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="basestuff.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="chatstuff.json">
+    <None Update="chat.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="basegenerator.py">
@@ -123,9 +127,6 @@
     <Page Update="HomePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Pages\" />
   </ItemGroup>
 
   <!--

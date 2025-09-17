@@ -1,238 +1,114 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
-using System.IO;
-using System.Net;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
+using Windows.Storage.Pickers;
+using Windows.Storage;
+using WinRT.Interop;
 
-namespace TarskyTGI
+namespace TarskyTGI.Pages
 {
     public sealed partial class HostPage : Page
     {
-        private string model;
-        private string chatFormat;
-        private int gpuLayers;
-        private int ctxBox;
-        private int predictBox;
-        private float temperatureBox;
-        private float toppBox;
-        private float minpBox;
-        private float typicalpBox;
-
-        private Process pythonProcess;
-        private StreamWriter pythonInput;
-        private StreamReader pythonOutput;
-        private bool modelLoaded = false;
-
-        private HttpListener _listener;
+        private Process serverProcess;
 
         public HostPage()
         {
             this.InitializeComponent();
-            InitializePythonProcess();
         }
 
-        private async void StartServer()
+        private async void StartServer_Click(object sender, RoutedEventArgs e)
         {
-            loadmodel1();
-
-            if (_listener == null || !_listener.IsListening)
+            if (serverProcess != null && !serverProcess.HasExited)
             {
-                string portText = PortTextBox.Text;
-                if (!int.TryParse(portText, out int port) || port <= 0 || port > 65535)
-                {
-                    StatusTextBlock.Text = "Invalid port number. Please enter a value between 1 and 65535.";
-                    return;
-                }
-
-                string url = $"http://localhost:{port}/";
-                _listener = new HttpListener();
-                _listener.Prefixes.Add(url);
-
-                try
-                {
-                    _listener.Start();
-                    StatusTextBlock.Text = $"Server started at {url}...";
-                    await AcceptRequests();
-                }
-                catch (HttpListenerException ex)
-                {
-                    StatusTextBlock.Text = $"Error: {ex.Message}";
-                }
+                StatusTextBlock.Text = "Server already running.";
+                return;
             }
-            else
-            {
-                StatusTextBlock.Text = "Server is already running.";
-            }
-        }
-
-        private async Task AcceptRequests()
-        {
-            try
-            {
-                while (_listener.IsListening)
-                {
-                    var context = await _listener.GetContextAsync();
-                    _ = HandleRequestAsync(context);
-                }
-            }
-            catch (HttpListenerException)
-            {
-                StatusTextBlock.Text = "Server stopped.";
-            }
-            catch (Exception ex)
-            {
-                StatusTextBlock.Text = $"Error: {ex.Message}";
-            }
-        }
-
-        private async Task HandleRequestAsync(HttpListenerContext context)
-        {
-            var request = context.Request;
-            var response = context.Response;
 
             try
             {
-                using (var reader = new StreamReader(request.InputStream, request.ContentEncoding))
-                {
-                    string input = await reader.ReadToEndAsync();
-                    StatusTextBlock.Text = $"Received: {input}";
+                string modelPath = ModelBox.Text;
+                string host = HostBox.Text;
+                string port = PortBox.Text;
 
-                    // Process input and create a response
-                    string generatedText = await GenerateText(input.Replace("\r", "/[newline]"));
-                    generatedText = generatedText.Replace("/[newline]", "\r");
-                    string responseString = $"{generatedText}";
-                    byte[] responseBytes = Encoding.UTF8.GetBytes(responseString);
+                StatusTextBlock.Text = "Starting server...";
 
-                    response.ContentType = "text/plain";
-                    response.ContentEncoding = Encoding.UTF8;
-                    response.ContentLength64 = responseBytes.Length;
-
-                    await response.OutputStream.WriteAsync(responseBytes, 0, responseBytes.Length);
-                }
-            }
-            catch (Exception ex)
-            {
-                StatusTextBlock.Text = $"Error: {ex.Message}";
-            }
-            finally
-            {
-                response.Close();
-            }
-        }
-
-        private void Button_StartServer_Click(object sender, RoutedEventArgs e)
-        {
-            StartServer();
-        }
-
-        private void Button_StopServer_Click(object sender, RoutedEventArgs e)
-        {
-            StopServer();
-        }
-
-        private void StopServer()
-        {
-            if (_listener != null && _listener.IsListening)
-            {
-                _listener.Stop();
-                _listener.Close();
-                StatusTextBlock.Text = "Server stopped.";
-                _listener = null;
-            }
-        }
-
-        // Text generation and model loading methods
-        private void InitializePythonProcess()
-        {
-            pythonProcess = new Process
-            {
-                StartInfo = new ProcessStartInfo
+                // Example: llama.cpp server mode (OpenAI API compatible)
+                // Adjust args for your backend
+                var startInfo = new ProcessStartInfo
                 {
                     FileName = "python",
-                    Arguments = "textgenerator.py",
+                    Arguments = $"server.py --model \"{modelPath}\" --ctx-size {ctxBox.Text} --n-gpu-layers {gpuLayers.Text} --host {host} --port {port}",
                     UseShellExecute = false,
-                    RedirectStandardInput = true,
                     RedirectStandardOutput = true,
+                    RedirectStandardError = true,
                     CreateNoWindow = true
+                };
+
+                serverProcess = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
+                serverProcess.OutputDataReceived += (s, ev) =>
+                {
+                    if (!string.IsNullOrEmpty(ev.Data))
+                        DispatcherQueue.TryEnqueue(() => StatusTextBlock.Text = ev.Data);
+                };
+                serverProcess.ErrorDataReceived += (s, ev) =>
+                {
+                    if (!string.IsNullOrEmpty(ev.Data))
+                        DispatcherQueue.TryEnqueue(() => StatusTextBlock.Text = "Error: " + ev.Data);
+                };
+
+                serverProcess.Start();
+                serverProcess.BeginOutputReadLine();
+                serverProcess.BeginErrorReadLine();
+
+                StatusTextBlock.Text = $"Server running at http://{host}:{port}/v1";
+            }
+            catch (Exception ex)
+            {
+                StatusTextBlock.Text = "Failed to start: " + ex.Message;
+            }
+        }
+
+        private void StopServer_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (serverProcess != null && !serverProcess.HasExited)
+                {
+                    serverProcess.Kill();
+                    serverProcess.Dispose();
+                    serverProcess = null;
+                    StatusTextBlock.Text = "Server stopped.";
                 }
-            };
-
-            pythonProcess.Start();
-            pythonInput = pythonProcess.StandardInput;
-            pythonOutput = pythonProcess.StandardOutput;
-        }
-
-        private void loadJson()
-        {
-            string jsonString = File.ReadAllText("chatstuff.json");
-            ChatClass jsonToLoad = JsonSerializer.Deserialize<ChatClass>(jsonString);
-            model = jsonToLoad.model;
-            ctxBox = jsonToLoad.n_ctx;
-            predictBox = jsonToLoad.n_predict;
-            temperatureBox = jsonToLoad.temperature;
-            toppBox = jsonToLoad.top_p;
-            minpBox = jsonToLoad.min_p;
-            typicalpBox = jsonToLoad.typical_p;
-            gpuLayers = jsonToLoad.layers;
-            chatFormat = jsonToLoad.format;
-        }
-
-        private async void loadmodel1()
-        {
-            loadJson();
-            string modelPath = model;
-            await LoadModel(modelPath);
-        }
-
-        private async Task LoadModel(string modelPath)
-        {
-            StatusTextBlock.Text = "Loading model...";
-
-            await pythonInput.WriteLineAsync("load");
-            await pythonInput.WriteLineAsync(modelPath);
-            await pythonInput.WriteLineAsync(gpuLayers.ToString());
-            await pythonInput.WriteLineAsync(chatFormat);
-            await pythonInput.FlushAsync();
-
-            string response = await pythonOutput.ReadLineAsync();
-            if (response.StartsWith("$model_loaded$"))
-            {
-                modelLoaded = true;
-                StatusTextBlock.Text = "LOADED.";
+                else
+                {
+                    StatusTextBlock.Text = "Server not running.";
+                }
             }
-            else if (response.StartsWith("$model_load_error$"))
+            catch (Exception ex)
             {
-                modelLoaded = false;
-                StatusTextBlock.Text = $"Failed to load model: {response.Substring(response.IndexOf(':') + 1)}";
-                StopServer();
+                StatusTextBlock.Text = "Error stopping server: " + ex.Message;
             }
         }
 
-        private async Task<string> GenerateText(string inputText)
+        private async void selectModelButton_Click(object sender, RoutedEventArgs e)
         {
-            await pythonInput.WriteLineAsync("chat_server");
-            await pythonInput.WriteLineAsync(inputText);
-            await pythonInput.WriteLineAsync(SystemPromptBox.Text);
-            await pythonInput.FlushAsync();
+            var picker = new FileOpenPicker();
+            var hwnd = WindowNative.GetWindowHandle(App.m_window);
+            InitializeWithWindow.Initialize(picker, hwnd);
 
-            string response = await pythonOutput.ReadLineAsync();
-            if (response.StartsWith("$not_loaded$"))
+            picker.ViewMode = PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = PickerLocationId.Desktop;
+            picker.FileTypeFilter.Add(".gguf");
+            picker.FileTypeFilter.Add(".bin");
+
+            StorageFile file = await picker.PickSingleFileAsync();
+            if (file != null)
             {
-                return "Error: Model not loaded.";
+                ModelBox.Text = file.Path;
             }
-            else if (response.StartsWith("$response$"))
-            {
-                return response.Substring(response.IndexOf(':') + 1);
-            }
-            else if (response.StartsWith("$error$"))
-            {
-                return $"Error: {response.Substring(response.IndexOf(':') + 1)}";
-            }
-            return response;
         }
     }
 }

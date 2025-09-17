@@ -1,28 +1,46 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Page
-    x:Class="TarskyTGI.HostPage"
+    x:Class="TarskyTGI.Pages.HostPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:TarskyTGI"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0" Spacing="10" Padding="10">
-            <TextBlock Text="Enter Port:" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-            <TextBox x:Name="PortTextBox" Width="200" PlaceholderText="5000" Text="5000"/>
-            <TextBox x:Name="SystemPromptBox" Width="200" PlaceholderText="System prompt" Text="You are a helpful assistant."/>
-            <Button Content="Start server" Click="Button_StartServer_Click"/>
-            <Button Content="Stop server" Click="Button_StopServer_Click"/>
-            <TextBlock x:Name="StatusTextBlock" 
-                       VerticalAlignment="Center" 
-                       HorizontalAlignment="Center" 
-                       TextWrapping="Wrap" 
-                       Text="Offline"/>
+    <Grid Padding="12" RowDefinitions="Auto,*">
+        <StackPanel Orientation="Vertical" Spacing="8">
+
+            <TextBlock Text="Model Server Control Panel" FontSize="20" FontWeight="Bold"/>
+
+            <!-- Model path -->
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <TextBox x:Name="ModelBox" Width="250" PlaceholderText="Model path"/>
+                <Button x:Name="selectModelButton" Content="📁" Click="selectModelButton_Click"/>
+            </StackPanel>
+
+            <!-- API port -->
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <TextBox x:Name="PortBox" Width="100" PlaceholderText="Port" Text="8080"/>
+                <TextBox x:Name="HostBox" Width="140" PlaceholderText="Host" Text="127.0.0.1"/>
+            </StackPanel>
+
+            <!-- Runtime parameters -->
+            <TextBox x:Name="ctxBox" Width="140" PlaceholderText="n_ctx" Text="1024"/>
+            <TextBox x:Name="gpuLayers" Width="140" PlaceholderText="GPU layers" Text="0"/>
+
+            <!-- Priority -->
+            <ComboBox x:Name="priorityBox" Width="140" SelectedIndex="2">
+                <ComboBoxItem Content="Idle"/>
+                <ComboBoxItem Content="BelowNormal"/>
+                <ComboBoxItem Content="Normal"/>
+                <ComboBoxItem Content="AboveNormal"/>
+                <ComboBoxItem Content="High"/>
+                <ComboBoxItem Content="RealTime"/>
+            </ComboBox>
+
+            <!-- Buttons -->
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button x:Name="startServerButton" Content="Start Server" Click="StartServer_Click"/>
+                <Button x:Name="stopServerButton" Content="Stop Server" Click="StopServer_Click"/>
+            </StackPanel>
+
+            <TextBlock x:Name="StatusTextBlock" Text="Idle."/>
         </StackPanel>
     </Grid>
 </Page>

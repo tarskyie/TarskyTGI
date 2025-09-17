@@ -1,21 +1,11 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.System;
 using System.Text.Json;
 using Windows.Storage.Pickers;
 using Windows.Storage;
@@ -29,7 +19,8 @@ namespace TarskyTGI
         private StreamWriter pythonInput;
         private StreamReader pythonOutput;
         private bool modelLoaded = false;
-
+        private string jsonPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\TarskyTGI\\chat.json";
+        private JsonService jsonService= new JsonService();
         private string sysPrompt = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.";
 
         public ChatPage()
@@ -42,15 +33,22 @@ namespace TarskyTGI
 
         private void loadJson()
         {
-            string jsonString = File.ReadAllText("chatstuff.json");
-            ChatClass jsonToLoad = JsonSerializer.Deserialize<ChatClass>(jsonString);
-            ModelBox.Text = jsonToLoad.model;
-            ctxBox.Text = jsonToLoad.n_ctx.ToString();
-            predictBox.Text = jsonToLoad.n_predict.ToString();
-            temperatureBox.Text = jsonToLoad.temperature.ToString();
-            toppBox.Text = jsonToLoad.top_p.ToString();
-            minpBox.Text = jsonToLoad.min_p.ToString();
-            typicalpBox.Text = jsonToLoad.typical_p.ToString();
+            try
+            {
+                string jsonString = File.ReadAllText(jsonPath);
+                ChatClass jsonToLoad = JsonSerializer.Deserialize<ChatClass>(jsonString);
+                ModelBox.Text = jsonToLoad.model;
+                ctxBox.Text = jsonToLoad.n_ctx.ToString();
+                predictBox.Text = jsonToLoad.n_predict.ToString();
+                temperatureBox.Text = jsonToLoad.temperature.ToString();
+                toppBox.Text = jsonToLoad.top_p.ToString();
+                minpBox.Text = jsonToLoad.min_p.ToString();
+                typicalpBox.Text = jsonToLoad.typical_p.ToString();
+            }
+            catch (Exception ex) { 
+                StatusTextBlock.Text = ex.Message;
+                jsonService.copyJsonToDocuments("chat.json");
+            }
         }
 
         private void InitializePythonProcess()
@@ -192,7 +190,7 @@ namespace TarskyTGI
 
                 string jsonString = JsonSerializer.Serialize(chatClass);
 
-                File.WriteAllText("chatstuff.json", jsonString);
+                File.WriteAllText(jsonPath, jsonString);
             }
             catch { }
         }

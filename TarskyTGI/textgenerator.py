@@ -7,7 +7,7 @@ model = None
 msgs = []
 
 def load_json():
-    with open('chatstuff.json', 'r') as f:
+    with open('chat.json', 'r') as f:
             data = json.load(f)
     return data
 

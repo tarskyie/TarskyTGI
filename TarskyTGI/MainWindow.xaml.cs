@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
+using TarskyTGI.Pages;
 
 namespace TarskyTGI
 {
