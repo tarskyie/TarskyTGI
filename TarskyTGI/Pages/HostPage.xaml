@@ -54,7 +54,7 @@
 
             <!-- Status -->
             <Border Background="DarkSlateGray" Padding="8" CornerRadius="4" Margin="0,12,0,0">
-                <TextBlock x:Name="StatusTextBlock" Text="Idle." FontWeight="SemiBold"/>
+                <TextBlock x:Name="StatusTextBlock" Text="Idle." FontWeight="SemiBold" Foreground="White"/>
             </Border>
 
         </StackPanel>
