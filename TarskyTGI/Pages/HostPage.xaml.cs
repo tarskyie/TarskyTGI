@@ -17,6 +17,7 @@ namespace TarskyTGI.Pages
         public HostPage()
         {
             this.InitializeComponent();
+            priorityBox.SelectionChanged += priorityBox_SelectionChanged;
         }
 
         private async void StartServer_Click(object sender, RoutedEventArgs e)
@@ -35,12 +36,10 @@ namespace TarskyTGI.Pages
 
                 StatusTextBlock.Text = "Starting server...";
 
-                // Example: llama.cpp server mode (OpenAI API compatible)
-                // Adjust args for your backend
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = "python",
-                    Arguments = $"server.py --model \"{modelPath}\" --ctx-size {ctxBox.Text} --n-gpu-layers {gpuLayers.Text} --host {host} --port {port}",
+                    Arguments = $"server.py --model \"{modelPath}\" --ctx-size {ctxBox.Text} --n-gpu-layers {gpuLayers.Text} --host {host} --port {port} --key {KeyBox.Text} --format {getChatFormatByIndex(formatBox, formatBox.SelectedIndex)}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -109,6 +108,38 @@ namespace TarskyTGI.Pages
             {
                 ModelBox.Text = file.Path;
             }
+        }
+
+        private void priorityBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (serverProcess == null) return;
+
+            var priorities = new[]
+            {
+                ProcessPriorityClass.Idle,
+                ProcessPriorityClass.BelowNormal,
+                ProcessPriorityClass.Normal,
+                ProcessPriorityClass.AboveNormal,
+                ProcessPriorityClass.High,
+                ProcessPriorityClass.RealTime
+            };
+
+            int index = priorityBox.SelectedIndex;
+            if (index >= 0 && index < priorities.Length)
+            {
+                serverProcess.PriorityClass = priorities[index];
+            }
+        }
+
+        private string getChatFormatByIndex(ComboBox comboBox, int index)
+        {
+            if (comboBox == null || index < 0 || index >= comboBox.Items.Count)
+                return null;
+
+            if (comboBox.Items[index] is ComboBoxItem item && item.Tag is string tag)
+                return tag;
+
+            return null;
         }
     }
 }
