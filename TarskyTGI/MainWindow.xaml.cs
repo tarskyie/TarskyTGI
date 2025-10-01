@@ -26,9 +26,7 @@ namespace TarskyTGI
                 { "InstructApp", typeof(InstructPage) },
                 { "BaseApp", typeof(BasePage) },
                 { "HostApp", typeof(HostPage) },
-                { "HomeApp", typeof(HomePage) },
-                { "hfPage", typeof(hfPage) },
-                { "dwnlds", typeof(downloadsPage) }
+                { "HomeApp", typeof(HomePage) }
             };
 
         private SystemBackdropConfiguration backdropConfiguration;
