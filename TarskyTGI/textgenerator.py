@@ -3,6 +3,14 @@ import llama_cpp
 import sys
 import json
 
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stdin.reconfigure(encoding='utf-8')
+except Exception:
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+    sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8', errors='replace')
+
 model = None
 msgs = []
 
@@ -73,7 +81,6 @@ while True:
 
     elif cmd == "clear":
         msgs.clear()
-        #msgs.append({"role":"system", "content":"You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."})
     
     elif cmd == "append":
         role = input()
