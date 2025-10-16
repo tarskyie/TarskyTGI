@@ -78,13 +78,27 @@
 
                 <!-- Controls -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="12" Margin="0,12,0,0">
-                    <Button x:Name="startServerButton" Content="▶ Start Server" Width="140" Click="StartServer_Click"/>
-                    <Button x:Name="stopServerButton" Content="⏹ Stop Server" Width="140" Click="StopServer_Click"/>
+                    <Button x:Name="startServerButton" Width="160" Click="StartServer_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <!-- "Play" icon -->
+                            <FontIcon Glyph="&#xE768;" FontFamily="Segoe Fluent Icons"/>
+                            <TextBlock Text="Start Server"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="stopServerButton" Width="160" Click="StopServer_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <!-- "Stop" icon -->
+                            <FontIcon Glyph="&#xE71A;" FontFamily="Segoe Fluent Icons"/>
+                            <TextBlock Text="Stop Server"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
+
 
                 <!-- Status -->
                 <Border Background="DarkSlateGray" Padding="8" CornerRadius="4" Margin="0,12,0,0">
-                    <TextBox x:Name="StatusTextBlock" Text="Idle." FontWeight="SemiBold" Foreground="White"/>
+                    <TextBox x:Name="StatusTextBlock" Text="Idle." FontWeight="SemiBold" Background="DarkSlateGray" Foreground="White"/>
                 </Border>
 
             </StackPanel>
