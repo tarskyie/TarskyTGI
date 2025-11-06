@@ -39,7 +39,7 @@ namespace TarskyTGI.Pages
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = "python",
-                    Arguments = $"server.py --model \"{modelPath}\" --ctx-size {ctxBox.Text} --n-gpu-layers {gpuLayers.Text} --host {host} --port {port} --key {KeyBox.Text} --format {getChatFormatByIndex(formatBox, formatBox.SelectedIndex)}",
+                    Arguments = $"-u -X utf8 server.py --model \"{modelPath}\" --ctx-size {ctxBox.Text} --n-gpu-layers {gpuLayers.Text} --host {host} --port {port} --key {KeyBox.Text} --format {getChatFormatByIndex(formatBox, formatBox.SelectedIndex)}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
