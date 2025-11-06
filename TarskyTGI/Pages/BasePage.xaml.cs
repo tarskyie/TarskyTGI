@@ -29,9 +29,10 @@ namespace TarskyTGI
     /// </summary>
     public sealed partial class BasePage : Page
     {
-        private Process pythonProcess;
-        private StreamWriter pythonInput;
-        private StreamReader pythonOutput;
+        private Process? pythonProcess;
+        private StreamWriter? pythonInput;
+        private StreamReader? pythonOutput;
+        private JsonService jsonService = new JsonService();
         private bool modelLoaded = false;
 
         public BasePage()
@@ -39,12 +40,25 @@ namespace TarskyTGI
             this.InitializeComponent();
             InitializePythonProcess();
             loadJson();
+            if (App.m_window != null)
+            {
+                App.m_window.Closed += Window_Closed;
+                this.Unloaded += BasePage_Unloaded;
+            }
         }
 
         private void loadJson()
         {
             string jsonString = File.ReadAllText("basestuff.json");
-            ChatClass jsonToLoad = JsonSerializer.Deserialize<ChatClass>(jsonString);
+            ChatClass? jsonToLoad = JsonSerializer.Deserialize<ChatClass?>(jsonString);
+
+            if (jsonToLoad is null)
+            {
+                StatusTextBlock.Text = "Chat configuration is empty or invalid. Restoring default configuration.";
+                jsonService.copyJsonToDocuments("chat.json");
+                return;
+            }
+
             ModelBox.Text = jsonToLoad.model;
             ctxBox.Text = jsonToLoad.n_ctx.ToString();
             predictBox.Text = jsonToLoad.n_predict.ToString();
@@ -83,11 +97,22 @@ namespace TarskyTGI
 
         private async Task LoadModel(string modelPath)
         {
+            if (pythonInput == null || pythonOutput == null)
+            {
+                StatusTextBlock.Text = "Error: Python process not initialized.";
+                return;
+            }
+
             await pythonInput.WriteLineAsync("load");
             await pythonInput.WriteLineAsync(modelPath);
             await pythonInput.FlushAsync();
 
-            string response = await pythonOutput.ReadLineAsync();
+            string ?response = await pythonOutput.ReadLineAsync();
+            if (response == null)
+            {
+                StatusTextBlock.Text = "Error: No response from model.";
+                return;
+            }
             if (response.StartsWith("$model_loaded$"))
             {
                 modelLoaded = true;
@@ -135,11 +160,19 @@ namespace TarskyTGI
 
         private async Task<string> GenerateText(string inputText)
         {
+            if (pythonInput == null || pythonOutput == null)
+            {
+                return "Error: Python process not initialized.";
+            }
             await pythonInput.WriteLineAsync("chat");
             await pythonInput.WriteLineAsync(inputText);
             await pythonInput.FlushAsync();
 
-            string response = await pythonOutput.ReadLineAsync();
+            string? response = await pythonOutput.ReadLineAsync();
+            if (response == null)
+            {
+                return "Error: No response from model.";
+            }
             if (response.StartsWith("$not_loaded$"))
             {
                 return "Error: Model not loaded.";
@@ -163,7 +196,7 @@ namespace TarskyTGI
 
         private async void Window_Closed(object sender, WindowEventArgs args)
         {
-            if (pythonProcess != null && !pythonProcess.HasExited)
+            if (pythonProcess != null && !pythonProcess.HasExited && pythonInput != null)
             {
                 await pythonInput.WriteLineAsync("exit");
                 await pythonInput.FlushAsync();
@@ -173,6 +206,15 @@ namespace TarskyTGI
                     pythonProcess.Kill();
                 }
                 pythonProcess.Dispose();
+            }
+        }
+
+        private void BasePage_Unloaded(object? sender, RoutedEventArgs e)
+        {
+            if (App.m_window != null)
+            {
+                App.m_window.Closed -= Window_Closed;
+                this.Unloaded -= BasePage_Unloaded;
             }
         }
 

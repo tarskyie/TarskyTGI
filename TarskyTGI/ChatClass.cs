@@ -18,7 +18,6 @@ namespace TarskyTGI
         public float typical_p { get; set; }
         public int layers { get; set; } 
 
-        public ChatClass() { }
         public ChatClass(string modelInp, string formatInp, int n_ctxInp, int n_predictInp, float temperatureInp, float top_pInp, float min_pInp, float typical_pInp, int layersInp) 
         {
             model = modelInp;

@@ -16,19 +16,19 @@ namespace TarskyTGI
 {
     public sealed partial class ChatPage : Page
     {
-        private Process pythonProcess;
-        private StreamWriter pythonInput;
-        private StreamReader pythonOutput;
+        private Process? pythonProcess;
+        private StreamWriter? pythonInput;
+        private StreamReader? pythonOutput;
         private bool modelLoaded = false;
         private string jsonPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\TarskyTGI\\chat.json";
-        private JsonService jsonService= new JsonService();
+        private JsonService jsonService = new JsonService();
         private string sysPrompt = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.";
 
         public ChatPage()
         {
             this.InitializeComponent();
             InitializePythonProcess();
-            InsertSysPrompt();
+            _ = InsertSysPrompt();
             loadJson();
         }
 
@@ -37,7 +37,15 @@ namespace TarskyTGI
             try
             {
                 string jsonString = File.ReadAllText(jsonPath);
-                ChatClass jsonToLoad = JsonSerializer.Deserialize<ChatClass>(jsonString);
+                ChatClass? jsonToLoad = JsonSerializer.Deserialize<ChatClass?>(jsonString);
+
+                if (jsonToLoad is null)
+                {
+                    StatusTextBlock.Text = "Chat configuration is empty or invalid. Restoring default configuration.";
+                    jsonService.copyJsonToDocuments("chat.json");
+                    return;
+                }
+
                 ModelBox.Text = jsonToLoad.model;
                 ctxBox.Text = jsonToLoad.n_ctx.ToString();
                 predictBox.Text = jsonToLoad.n_predict.ToString();
@@ -46,7 +54,8 @@ namespace TarskyTGI
                 minpBox.Text = jsonToLoad.min_p.ToString();
                 typicalpBox.Text = jsonToLoad.typical_p.ToString();
             }
-            catch (Exception ex) { 
+            catch (Exception ex)
+            {
                 StatusTextBlock.Text = ex.Message;
                 jsonService.copyJsonToDocuments("chat.json");
             }
@@ -83,6 +92,7 @@ namespace TarskyTGI
 
         private async Task InsertSysPrompt()
         {
+            if (pythonInput == null) return;
             await pythonInput.WriteLineAsync("system");
             await pythonInput.WriteLineAsync(sysPrompt);
             await pythonInput.FlushAsync();
@@ -100,7 +110,7 @@ namespace TarskyTGI
                 StatusTextBlock.Text = "Please enter a valid number of GPU layers.";
                 return;
             }
-            
+
             string modelPath = ModelBox.Text;
             await LoadModel(modelPath, gpu_layers);
         }
@@ -108,15 +118,24 @@ namespace TarskyTGI
         private async Task LoadModel(string modelPath, int gpu_l)
         {
             StatusTextBlock.Text = "Loading model...";
-            //TODO exceptions
+
+            if (pythonInput == null || pythonOutput == null) return;
+
             await pythonInput.WriteLineAsync("load");
             await pythonInput.WriteLineAsync(modelPath);
             await pythonInput.WriteLineAsync(gpu_l.ToString());
             await pythonInput.WriteLineAsync(ChatFormatBox.Text);
             await pythonInput.FlushAsync();
 
-            string response = await pythonOutput.ReadLineAsync();
-            
+            string ?response = await pythonOutput.ReadLineAsync();
+
+            if (response == null)
+            {
+                modelLoaded = false;
+                StatusTextBlock.Text = "Failed to load model: No response from backend.";
+                return;
+            }
+
             if (response.StartsWith("$model_loaded$"))
             {
                 modelLoaded = true;
@@ -131,6 +150,8 @@ namespace TarskyTGI
 
         private async void ClearFN(object sender, RoutedEventArgs e)
         {
+            if (pythonInput == null) return;
+
             await pythonInput.WriteLineAsync("clear");
             await pythonInput.WriteLineAsync("append");
             await pythonInput.WriteLineAsync("system");
@@ -150,7 +171,7 @@ namespace TarskyTGI
                     StatusTextBlock.Text = "Please load a model first.";
                     return;
                 }
-                
+
                 string inputText = PromptBox.Text.Trim();
                 PromptBox.Text = string.Empty;
                 string generatedText = await GenerateText(inputText.Replace("\r", "/[newline]"));
@@ -170,11 +191,17 @@ namespace TarskyTGI
 
         private async Task<string> GenerateText(string inputText)
         {
+            if (pythonInput == null || pythonOutput == null) return "Error: Backend not initialized.";
+
             await pythonInput.WriteLineAsync("chat");
             await pythonInput.WriteLineAsync(inputText);
             await pythonInput.FlushAsync();
 
-            string response = await pythonOutput.ReadLineAsync();
+            string ?response = await pythonOutput.ReadLineAsync();
+            if (response == null)
+            {
+                return "Error: No response from backend.";
+            }
             if (response.StartsWith("$not_loaded$"))
             {
                 return "Error: Model not loaded.";

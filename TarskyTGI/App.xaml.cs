@@ -45,6 +45,6 @@ namespace TarskyTGI
             m_window.Activate();
         }
 
-        public static Window m_window;
+        public static Window? m_window;
     }
 }

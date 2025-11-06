@@ -12,7 +12,7 @@ namespace TarskyTGI.Pages
 {
     public sealed partial class HostPage : Page
     {
-        private Process serverProcess;
+        private Process ?serverProcess;
 
         public HostPage()
         {
@@ -131,7 +131,7 @@ namespace TarskyTGI.Pages
             }
         }
 
-        private string getChatFormatByIndex(ComboBox comboBox, int index)
+        private string? getChatFormatByIndex(ComboBox comboBox, int index)
         {
             if (comboBox == null || index < 0 || index >= comboBox.Items.Count)
                 return null;
