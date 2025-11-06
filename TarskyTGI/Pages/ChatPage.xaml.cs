@@ -5,10 +5,11 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 using System.Text.Json;
-using Windows.Storage.Pickers;
+using System.Threading.Tasks;
 using Windows.Storage;
+using Windows.Storage.Pickers;
 using WinRT.Interop;
 
 namespace TarskyTGI
@@ -53,17 +54,24 @@ namespace TarskyTGI
 
         private void InitializePythonProcess()
         {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "python",
+                Arguments = "-u -X utf8 textgenerator.py",
+                UseShellExecute = false,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
+
+            startInfo.StandardOutputEncoding = Encoding.UTF8;
+            startInfo.StandardInputEncoding = Encoding.UTF8;
+
+            startInfo.EnvironmentVariables["PYTHONUTF8"] = "1";
+
             pythonProcess = new Process
             {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "python",
-                    Arguments = "textgenerator.py",
-                    UseShellExecute = false,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
-                }
+                StartInfo = startInfo
             };
 
             pythonProcess.Start();
@@ -71,6 +79,7 @@ namespace TarskyTGI
             pythonOutput = pythonProcess.StandardOutput;
             pythonProcess.PriorityClass = ProcessPriorityClass.Normal;
         }
+
 
         private async Task InsertSysPrompt()
         {
