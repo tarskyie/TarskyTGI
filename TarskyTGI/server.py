@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List, Optional
 from fastapi import Header, HTTPException
+import sys
 import uvicorn
 import time
 
@@ -67,6 +68,7 @@ async def create_chat_completion(request: ChatRequest, authorization: str = Head
     output = llm.create_chat_completion(messages=msgs, temperature=request.temperature, top_p=request.top_p, max_tokens=request.max_tokens)
 
     choice = output["choices"][0]
+    llm.reset()
     # Response in OpenAI format
     return ChatResponse(
         id=output.get("id", "chatcmpl-1"),
