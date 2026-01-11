@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="TarskyTGI.BasePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:TarskyTGI"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <!--define rows and columns-->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="70"/>
+            <ColumnDefinition Width="70"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="55"/>
+        </Grid.RowDefinitions>
+
+        <!--Base interface done with textbox-->
+        <TextBox
+            x:Name="mainText"
+            Grid.Row="0"
+            AcceptsReturn="True"
+            TextWrapping="Wrap"/>
+
+        <!--Side bar-->
+        <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="2" VerticalAlignment="Top">
+            <TextBlock x:Name="StatusTextBlock" Text="Not loaded"/>
+            <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBox x:Name="ModelBox" Width="100" PlaceholderText="Model path" TextChanged="ModelBox_TextChanged"/>
+                <Button x:Name="selectModelButton" Content="📁" Click="selectModelButton_Click"/>
+            </StackPanel>
+            <TextBox x:Name="ctxBox" Width="140" PlaceholderText="n_ctx" Text="1024" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
+            <TextBox x:Name="predictBox" Width="140" PlaceholderText="n_predict" Text="128" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
+            <TextBox x:Name="temperatureBox" Width="140" PlaceholderText="temperature" Text="0.8" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
+            <TextBox x:Name="toppBox" Width="140" PlaceholderText="top_p" Text="0.95" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
+            <TextBox x:Name="minpBox" Width="140" PlaceholderText="min_p" Text="0.05" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
+            <TextBox x:Name="typicalpBox" Width="140" PlaceholderText="typical_p" Text="1" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
+        </StackPanel>
+
+        <!--Bottom stuff-->
+        <TextBox PlaceholderText="Your prompt here. Shift+Enter to newline."
+         PreviewKeyDown="PromptBox_KeyDown"
+         Height="50" 
+         HorizontalAlignment="Stretch" 
+         VerticalAlignment="Stretch" 
+         Grid.Column="0" Grid.Row="1" 
+         x:Name="PromptBox" 
+         TextWrapping="Wrap"
+         AcceptsReturn="True"
+         />
+
+        <Button HorizontalAlignment="Stretch" Content="Send" Grid.Column="1" Grid.Row="1" Click="SendFN"/>
+        <Button HorizontalAlignment="Stretch" Content="Clear" Grid.Column="2" Grid.Row="1" Click="ClearFN"/>
+    </Grid>
+</Page>

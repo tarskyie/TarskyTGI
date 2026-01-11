@@ -1,0 +1,107 @@
+<Page
+    x:Class="TarskyTGI.Pages.HostPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Padding="20" RowDefinitions="Auto,*">
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel Orientation="Vertical" Spacing="16" CanBeScrollAnchor="True">
+
+                <!-- Title -->
+                <TextBlock Text="Server Control Panel"
+               FontSize="24"
+               FontWeight="Bold"
+               Margin="0,0,0,12"/>
+
+                <!-- Model Selection -->
+                <Expander Header="Model Configuration" IsExpanded="True">
+                    <StackPanel Orientation="Vertical" Spacing="8" Padding="8">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBox x:Name="ModelBox" Width="300" PlaceholderText="Model path"/>
+                            <Button x:Name="selectModelButton" Content="Browse..." Click="selectModelButton_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Network Settings -->
+                <Expander Header="Network Settings" IsExpanded="True">
+                    <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
+                        <TextBox x:Name="HostBox" Width="160" PlaceholderText="Host" Text="127.0.0.1"/>
+                        <TextBox x:Name="PortBox" Width="100" PlaceholderText="Port" Text="8080"/>
+                        <TextBox x:Name="KeyBox" Width="100" PlaceholderText="API key" Text="none"/>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Runtime Parameters -->
+                <Expander Header="Runtime Parameters" IsExpanded="False">
+                    <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
+                        <TextBox x:Name="ctxBox" Width="140" PlaceholderText="n_ctx" Text="1024"/>
+                        <TextBox x:Name="gpuLayers" Width="140" PlaceholderText="GPU layers" Text="0"/>
+                        <ComboBox x:Name="formatBox" Width="160" SelectedIndex="0" PlaceholderText="Chat format">
+                            <ComboBoxItem Content="llama-3" Tag="llama-3"/>
+                            <ComboBoxItem Content="llama-2" Tag="llama-2"/>
+                            <ComboBoxItem Content="alpaca" Tag="alpaca"/>
+                            <ComboBoxItem Content="qwen" Tag="qwen"/>
+                            <ComboBoxItem Content="vicuna" Tag="vicuna"/>
+                            <ComboBoxItem Content="oasst_llama" Tag="oasst_llama"/>
+                            <ComboBoxItem Content="baichuan-2" Tag="baichuan-2"/>
+                            <ComboBoxItem Content="baichuan" Tag="baichuan"/>
+                            <ComboBoxItem Content="openbuddy" Tag="openbuddy"/>
+                            <ComboBoxItem Content="redpajama-incite" Tag="redpajama-incite"/>
+                            <ComboBoxItem Content="snoozy" Tag="snoozy"/>
+                            <ComboBoxItem Content="phind" Tag="phind"/>
+                            <ComboBoxItem Content="intel" Tag="intel"/>
+                            <ComboBoxItem Content="open-orca" Tag="open-orca"/>
+                            <ComboBoxItem Content="mistrallite" Tag="mistrallite"/>
+                            <ComboBoxItem Content="zephyr" Tag="zephyr"/>
+                            <ComboBoxItem Content="pygmalion" Tag="pygmalion"/>
+                            <ComboBoxItem Content="chatml" Tag="chatml"/>
+                            <ComboBoxItem Content="mistral-instruct" Tag="mistral-instruct"/>
+                            <ComboBoxItem Content="chatglm3" Tag="chatglm3"/>
+                            <ComboBoxItem Content="openchat" Tag="openchat"/>
+                            <ComboBoxItem Content="saiga" Tag="saiga"/>
+                            <ComboBoxItem Content="gemma" Tag="gemma"/>
+                            <ComboBoxItem Content="functionary" Tag="functionary"/>
+                            <ComboBoxItem Content="functionary-v1" Tag="functionary-v1"/>
+                            <ComboBoxItem Content="functionary-v2" Tag="functionary-v2"/>
+                        </ComboBox>
+                        <ComboBox x:Name="priorityBox" Width="160" SelectedIndex="2" PlaceholderText="Priority">
+                            <ComboBoxItem Content="Idle"/>
+                            <ComboBoxItem Content="BelowNormal"/>
+                            <ComboBoxItem Content="Normal"/>
+                            <ComboBoxItem Content="AboveNormal"/>
+                            <ComboBoxItem Content="High"/>
+                            <ComboBoxItem Content="RealTime"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Controls -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="12" Margin="0,12,0,0">
+                    <Button x:Name="startServerButton" Width="160" Click="StartServer_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <!-- "Play" icon -->
+                            <FontIcon Glyph="&#xE768;" FontFamily="Segoe Fluent Icons"/>
+                            <TextBlock Text="Start Server"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="stopServerButton" Width="160" Click="StopServer_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <!-- "Stop" icon -->
+                            <FontIcon Glyph="&#xE71A;" FontFamily="Segoe Fluent Icons"/>
+                            <TextBlock Text="Stop Server"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+
+                <!-- Status -->
+                <Border Background="DarkSlateGray" Padding="8" CornerRadius="4" Margin="0,12,0,0">
+                    <TextBox x:Name="StatusTextBlock" Text="Idle." FontWeight="SemiBold" Background="DarkSlateGray" Foreground="White"/>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

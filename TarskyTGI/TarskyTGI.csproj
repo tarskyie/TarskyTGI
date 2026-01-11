@@ -1,0 +1,128 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+		<TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
+		<RootNamespace>TarskyTGI</RootNamespace>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<Platforms>x86;x64;ARM64</Platforms>
+		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+		<PublishProfile>win-$(Platform).pubxml</PublishProfile>
+		<UseWinUI>true</UseWinUI>
+		<EnableMsixTooling>false</EnableMsixTooling>
+		<Nullable>enable</Nullable>
+		<WindowsPackageType>None</WindowsPackageType>
+		<SupportedOSPlatformVersion>10.0.18362.0</SupportedOSPlatformVersion>
+		<PackageIcon>icon.png</PackageIcon>
+		<ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+	</PropertyGroup>
+
+	<ItemGroup>
+    <None Remove="BasePage.xaml" />
+    <None Remove="ChatPage.xaml" />
+    <None Remove="downloadsPage.xaml" />
+    <None Remove="hfPage.xaml" />
+    <None Remove="HomePage.xaml" />
+    <None Remove="HostPage.xaml" />
+    <None Remove="InstructPage.xaml" />
+    <None Remove="Pages\HostPage.xaml" />
+  </ItemGroup> 
+
+  <ItemGroup>
+    <Content Include="Assets\SplashScreen.scale-200.png" />
+    <Content Include="Assets\LockScreenLogo.scale-200.png" />
+    <Content Include="Assets\Square150x150Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+    <Content Include="Assets\StoreLogo.png" />
+    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.3.6" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls" Version="7.1.3" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.6901" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251003001" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.Text.Json" Version="9.0.10" />
+    <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+
+  <!--
+    Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
+    Tools extension to be activated for this project even if the Windows App SDK Nuget
+    package has not yet been restored.
+  -->
+  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <ProjectCapability Include="Msix" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="BasePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Pages\HostPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <None Update="server.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="basestuff.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="chat.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="basegenerator.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="instruct.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="instruct.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <Page Update="HostPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="InstructPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <None Update="textgenerator.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="ChatPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="downloadsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="hfPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="HomePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <!--
+    Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
+    Explorer "Package and Publish" context menu entry to be enabled for this project even if
+    the Windows App SDK Nuget package has not yet been restored.
+  -->
+  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+  </PropertyGroup>
+</Project>

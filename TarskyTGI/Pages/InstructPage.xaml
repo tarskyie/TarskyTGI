@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="TarskyTGI.InstructPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:TarskyTGI"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid>
+        <!-- Define rows and columns -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="70"/>
+            <ColumnDefinition Width="70"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Side bar -->
+        <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="2" VerticalAlignment="Top">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Send" Height="60" Width="70" Click="SendFN" AutomationProperties.Name="Send Button"/>
+                <Button Content="Copy" Height="60" Width="70" x:Name="copyButton" Click="copyButton_Click" AutomationProperties.Name="Copy Button"/>
+            </StackPanel>
+            <TextBlock x:Name="StatusTextBlock" Text="Not loaded" AutomationProperties.Name="Status Text"/>
+            <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click" AutomationProperties.Name="Load Model Button"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBox x:Name="ModelBox" Width="100" PlaceholderText="Model path" TextChanged="ModelBox_TextChanged"/>
+                <Button x:Name="selectModelButton" Content="📁" Click="selectModelButton_Click"/>
+            </StackPanel>
+            <TextBox x:Name="ctxBox" Width="140" PlaceholderText="n_ctx" Text="1024" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged" AutomationProperties.Name="Context TextBox"/>
+            <TextBox x:Name="predictBox" Width="140" PlaceholderText="n_predict" Text="128" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged" AutomationProperties.Name="Predict TextBox"/>
+            <TextBox x:Name="temperatureBox" Width="140" PlaceholderText="temperature" Text="0.8" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged" AutomationProperties.Name="Temperature TextBox"/>
+            <TextBox x:Name="toppBox" Width="140" PlaceholderText="top_p" Text="0.95" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged" AutomationProperties.Name="Top P TextBox"/>
+            <TextBox x:Name="minpBox" Width="140" PlaceholderText="min_p" Text="0.05" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged" AutomationProperties.Name="Min P TextBox"/>
+            <TextBox x:Name="typicalpBox" Width="140" PlaceholderText="typical_p" Text="1" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged" AutomationProperties.Name="Typical P TextBox"/>
+        </StackPanel>
+
+        <!-- Input box -->
+        <TextBox Grid.Column="0" Grid.Row="0"
+                PlaceholderText="Your prompt here. Shift+Enter to newline."
+                x:Name="PromptBox" 
+                TextWrapping="Wrap"
+                AcceptsReturn="True"
+                PreviewKeyDown="PromptBox_PreviewKeyDown"
+                AutomationProperties.Name="Prompt TextBox"/>
+
+        <!-- Instruct box -->
+        <TextBox Grid.Column="0" 
+                 Grid.Row="1"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 x:Name="outputBox"
+                 AutomationProperties.Name="Output TextBox"/>
+    </Grid>
+</Page>

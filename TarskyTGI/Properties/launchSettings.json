@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "TarskyTGI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "TarskyTGI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
