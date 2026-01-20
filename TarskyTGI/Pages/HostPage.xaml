@@ -65,7 +65,7 @@
                             <ComboBoxItem Content="functionary-v1" Tag="functionary-v1"/>
                             <ComboBoxItem Content="functionary-v2" Tag="functionary-v2"/>
                         </ComboBox>
-                        <ComboBox x:Name="priorityBox" Width="160" SelectedIndex="2" PlaceholderText="Priority">
+                        <ComboBox x:Name="priorityBox" SelectionChanged="priorityBox_SelectionChanged" Width="160" SelectedIndex="2" PlaceholderText="Priority">
                             <ComboBoxItem Content="Idle"/>
                             <ComboBoxItem Content="BelowNormal"/>
                             <ComboBoxItem Content="Normal"/>

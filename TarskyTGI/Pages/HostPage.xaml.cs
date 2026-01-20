@@ -13,7 +13,6 @@ namespace TarskyTGI.Pages
     public sealed partial class HostPage : Page
     {
         private Process ?serverProcess;
-
         public HostPage()
         {
             this.InitializeComponent();
@@ -59,6 +58,7 @@ namespace TarskyTGI.Pages
                 };
 
                 serverProcess.Start();
+                SetPriority();
                 serverProcess.BeginOutputReadLine();
                 serverProcess.BeginErrorReadLine();
 
@@ -111,6 +111,11 @@ namespace TarskyTGI.Pages
         }
 
         private void priorityBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SetPriority();
+        }
+
+        private void SetPriority()
         {
             if (serverProcess == null) return;
 
