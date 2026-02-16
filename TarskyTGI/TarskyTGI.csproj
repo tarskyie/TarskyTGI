@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
@@ -68,33 +68,12 @@
     <Page Update="Pages\HostPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <None Update="server.py">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="basestuff.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="chat.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="basegenerator.py">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="instruct.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="instruct.py">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <Page Update="HostPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Update="InstructPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <None Update="textgenerator.py">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Page Update="ChatPage.xaml">
