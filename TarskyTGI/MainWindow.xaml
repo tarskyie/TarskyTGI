@@ -42,7 +42,6 @@
             <muxc:NavigationView.MenuItems>
                 <muxc:NavigationViewItem Content="Home" Icon="Home" Tag="HomeApp"/>
                 <muxc:NavigationViewItem Content="Chat" Icon="Message" Tag="ChatApp"/>
-                <muxc:NavigationViewItem Content="Llava" Icon="View" Tag="LlavaApp"/>
                 <muxc:NavigationViewItem Content="Base" Icon="Edit" Tag="BaseApp"/>
                 <muxc:NavigationViewItem Content="Server" Icon="Globe" Tag="HostApp"/>
             </muxc:NavigationView.MenuItems>

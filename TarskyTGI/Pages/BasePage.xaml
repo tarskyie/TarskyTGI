@@ -34,7 +34,11 @@
             <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click"/>
             <StackPanel Orientation="Horizontal">
                 <TextBox x:Name="ModelBox" Width="100" PlaceholderText="Model path" TextChanged="ModelBox_TextChanged"/>
-                <Button x:Name="selectModelButton" Content="📁" Click="selectModelButton_Click"/>
+                <Button x:Name="selectModelButton" Click="selectModelButton_Click">
+                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}"
+      Glyph="&#xE8B7;"
+      FontSize="20" />
+                </Button>
             </StackPanel>
             <TextBox x:Name="ctxBox" Width="140" PlaceholderText="n_ctx" Text="1024" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
             <TextBox x:Name="predictBox" Width="140" PlaceholderText="n_predict" Text="128" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>

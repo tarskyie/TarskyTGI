@@ -18,7 +18,7 @@ namespace TarskyTGI
 {
     public sealed partial class MainWindow : Window
     {
-        private readonly string[] processNames = { "python", "WebView2" };
+        private readonly string[] processNames = { "llama-server", "WebView2" };
         private readonly Dictionary<string, Type> navigationMap = new()
             {
                 { "ChatApp", typeof(ChatPage) },

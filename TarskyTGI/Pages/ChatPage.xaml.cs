@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace TarskyTGI
         private TextGenerator? textGenerator;
         private bool modelLoaded = false;
         private string? currentImgPath = null; // Stores current image for the next prompt
-        private string jsonPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\TarskyTGI\\chat.json";
+        private string jsonPath;
         private JsonService jsonService = new JsonService();
         private string sysPrompt = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.";
 
@@ -29,6 +30,8 @@ namespace TarskyTGI
             textGenerator = new TextGenerator();
             textGenerator.Initialize();
             _ = textGenerator.InsertSystemPromptAsync(sysPrompt);
+
+            jsonPath = jsonService.GetJsonFilePath("chat.json");
             LoadJson();
         }
 
@@ -36,29 +39,59 @@ namespace TarskyTGI
         {
             try
             {
+                jsonService.EnsureJsonExists("chat.json", "chat.json");
+
                 if (!File.Exists(jsonPath))
                 {
-                    jsonService.copyJsonToDocuments("chat.json");
-                }
-
-                string jsonString = File.ReadAllText(jsonPath);
-                ChatClass? jsonToLoad = JsonSerializer.Deserialize<ChatClass>(jsonString);
-
-                if (jsonToLoad is null)
-                {
-                    StatusTextBlock.Text = "Config invalid. Restoring defaults.";
-                    jsonService.copyJsonToDocuments("chat.json");
+                    StatusTextBlock.Text = "Config file missing; created default.";
                     return;
                 }
 
-                ModelBox.Text = jsonToLoad.model ?? "";
+                string jsonString = File.ReadAllText(jsonPath);
+                ChatClass? jsonToLoad = null;
+                try
+                {
+                    jsonToLoad = JsonSerializer.Deserialize<ChatClass?>(jsonString);
+                }
+                catch (Exception ex)
+                {
+                    StatusTextBlock.Text = "Config invalid: " + ex.Message;
+                }
+
+                if (jsonToLoad is null)
+                {
+                    StatusTextBlock.Text = "Config invalid or empty; using defaults.";
+                    return;
+                }
+
+                ModelBox.Text = jsonToLoad.model ?? string.Empty;
                 ctxBox.Text = jsonToLoad.n_ctx.ToString();
                 temperatureBox.Text = jsonToLoad.temperature.ToString();
                 toppBox.Text = jsonToLoad.top_p.ToString();
                 minpBox.Text = jsonToLoad.min_p.ToString();
                 typicalpBox.Text = jsonToLoad.typical_p.ToString();
-                // Attempt to restore format if possible, otherwise default to index 0
-                // (ChatClass might need an update to store format, if not present we ignore)
+                // Restore other fields if present
+                gpuLayers.Text = jsonToLoad.layers.ToString();
+                // format could be used to set ChatFormatCombo
+                if (!string.IsNullOrEmpty(jsonToLoad.format))
+                {
+                    // try to set ComboBox text or select matching item
+                    bool matched = false;
+                    for (int i = 0; i < ChatFormatCombo.Items.Count; i++)
+                    {
+                        if ((ChatFormatCombo.Items[i] as string) == jsonToLoad.format)
+                        {
+                            ChatFormatCombo.SelectedIndex = i;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched)
+                    {
+                        ChatFormatCombo.Text = jsonToLoad.format;
+                    }
+                }
+
             }
             catch (Exception ex)
             {
@@ -146,10 +179,26 @@ namespace TarskyTGI
 
             StatusTextBlock.Text = "Generating...";
 
-            // Backend handles newline replacements if needed
-            string preparedInput = rawInput.Replace("\r", "/[newline]");
+            var messages = new List<TextGenerator.ChatMessage>
+            {
+                new TextGenerator.ChatMessage { role = "system", content = sysPrompt }
+            };
 
-            string generatedText = await GenerateText(preparedInput, currentImgPath);
+            for (int i = 0; i < ChatHistory.Items.Count; i++)
+            {
+                var item = ChatHistory.Items[i] as string;
+                if (i % 2 == 0)
+                {
+                    messages.Add(new TextGenerator.ChatMessage { role = "user", content = item });
+                }
+                else
+                {
+                    messages.Add(new TextGenerator.ChatMessage { role = "assistant", content = item });
+                }
+            }
+
+
+            string generatedText = await GenerateChat(messages);
 
             // Post-process output
             string outputString = generatedText.Replace("/[newline]", "\r");
@@ -160,6 +209,12 @@ namespace TarskyTGI
             // Clear image after single turn use (standard behavior for many chat interfaces, 
             // comment out ClearImage() if you want image persistence across turns)
             ClearImage();
+        }
+
+        private async Task<string> GenerateChat(List<TextGenerator.ChatMessage> messages)
+        {
+            if (textGenerator == null) return "Error: Backend not initialized.";
+            return await textGenerator.GenerateChatCompletionAsync(messages);
         }
 
         private async Task<string> GenerateText(string inputText, string? imgPath)
@@ -195,17 +250,17 @@ namespace TarskyTGI
             {
                 // Basic validation to prevent crash on empty strings
                 int.TryParse(ctxBox.Text, out int n_ctx);
-                int.TryParse("60", out int n_predict);
+                // ChatPage UI does not expose n_predict; use a sensible default
+                int n_predict = 128;
                 float.TryParse(temperatureBox.Text, out float temp);
                 float.TryParse(toppBox.Text, out float top_p);
                 float.TryParse(minpBox.Text, out float min_p);
                 float.TryParse(typicalpBox.Text, out float typ_p);
-                int.TryParse(gpuLayers.Text, out int gpu); // saving gpu layers to min_p field in previous logic? 
-                                                           // sticking to constructor signature provided in context:
+                int.TryParse(gpuLayers.Text, out int gpu);
 
                 var chatClass = new ChatClass(
                     ModelBox.Text.Trim(),
-                    "chatml", // Defaulting format in JSON for now
+                    ChatFormatCombo.Text,
                     n_ctx,
                     n_predict,
                     temp,
@@ -218,7 +273,10 @@ namespace TarskyTGI
                 string jsonString = JsonSerializer.Serialize(chatClass);
                 File.WriteAllText(jsonPath, jsonString);
             }
-            catch { /* Ignore serialization errors during typing */ }
+            catch (Exception ex)
+            {
+                StatusTextBlock.Text = ex.Message;
+            }
         }
 
         private void TextBox_BeforeTextChanging(TextBox sender, TextBoxBeforeTextChangingEventArgs args)
@@ -296,6 +354,11 @@ namespace TarskyTGI
                 _ => ProcessPriorityClass.Normal
             };
             textGenerator.SetProcessPriority(priority);
+        }
+
+        private void ChatHistory_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ((ListBox)sender).SelectedIndex = -1;
         }
     }
 }

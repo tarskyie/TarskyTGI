@@ -361,3 +361,10 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/TarskyTGI/CompiledLlama/ggml-base.dll
+/TarskyTGI/CompiledLlama/ggml-cpu.dll
+/TarskyTGI/CompiledLlama/ggml-vulkan.dll
+/TarskyTGI/CompiledLlama/ggml.dll
+/TarskyTGI/CompiledLlama/llama-server.exe
+/TarskyTGI/CompiledLlama/llama.dll
+/TarskyTGI/CompiledLlama/mtmd.dll

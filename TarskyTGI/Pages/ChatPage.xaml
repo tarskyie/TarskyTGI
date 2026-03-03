@@ -18,7 +18,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ListBox Grid.Row="0" Grid.Column="0" x:Name="ChatHistory" Margin="0,0,10,0">
+        <ListBox Grid.Row="0" Grid.Column="0" x:Name="ChatHistory" Margin="0,0,10,0" SelectionChanged="ChatHistory_SelectionChanged">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBox Text="{Binding}" TextWrapping="Wrap" IsReadOnly="True" BorderThickness="0" Background="Transparent"/>
@@ -58,15 +58,24 @@
 
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBox x:Name="ModelBox" PlaceholderText="Model path (.gguf)" TextChanged="ModelBox_TextChanged"/>
-                    <Button x:Name="selectModelButton" Content="📁" Click="selectModelButton_Click" Grid.Column="1" Margin="5,0,0,0"/>
+                    <Button x:Name="selectModelButton" Click="selectModelButton_Click" Grid.Column="1" Margin="5,0,0,0">
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}"
+                              Glyph="&#xE8B7;"
+                              FontSize="20" />
+                    </Button>
                 </Grid>
 
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBox x:Name="MmprojBox" PlaceholderText="Multimodal (mmproj) path"/>
-                    <Button x:Name="selectMmprojButton" Content="📁" Click="selectMmprojButton_Click" Grid.Column="1" Margin="5,0,0,0"/>
+                    <Button x:Name="selectMmprojButton" Click="selectMmprojButton_Click" Grid.Column="1" Margin="5,0,0,0">
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}"
+                              Glyph="&#xE8B7;"
+                              FontSize="20" />
+                    </Button>
                 </Grid>
 
                 <ComboBox x:Name="ChatFormatCombo" Header="Chat Format" HorizontalAlignment="Stretch" SelectedIndex="0" IsEditable="True">
+                    <x:String>default</x:String>
                     <x:String>chatml</x:String>
                     <x:String>llama-3</x:String>
                     <x:String>llava-1-5</x:String>

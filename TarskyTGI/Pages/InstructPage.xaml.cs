@@ -1,38 +1,29 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Storage.Pickers;
 using Windows.Storage;
 using WinRT.Interop;
 using Windows.ApplicationModel.DataTransfer;
+using System;
 
 namespace TarskyTGI
 {
     public sealed partial class InstructPage : Page
     {
-        private Process pythonProcess;
-        private StreamWriter pythonInput;
-        private StreamReader pythonOutput;
+        private TextGenerator textGenerator = new TextGenerator();
         private bool modelLoaded = false;
         public InstructPage()
         {
             this.InitializeComponent();
-            InitializePythonProcess();
+            textGenerator.Initialize();
             loadJson();
+            this.Unloaded += InstructPage_Unloaded;
         }
 
         private void loadJson()
@@ -48,24 +39,9 @@ namespace TarskyTGI
             typicalpBox.Text = jsonToLoad.typical_p.ToString();
         }
 
-        private void InitializePythonProcess()
+        private void InstructPage_Unloaded(object sender, RoutedEventArgs e)
         {
-            pythonProcess = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "py",
-                    Arguments = "instruct.py",
-                    UseShellExecute = false,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
-                }
-            };
-
-            pythonProcess.Start();
-            pythonInput = pythonProcess.StandardInput;
-            pythonOutput = pythonProcess.StandardOutput;
+            textGenerator.Dispose();
         }
 
 
@@ -91,36 +67,13 @@ namespace TarskyTGI
 
                 string inputText = PromptBox.Text.Trim();
                 string itemsAsString = outputBox.Text;
-                string generatedText = await GenerateText(itemsAsString + inputText);
+                string generatedText = await textGenerator.GenerateTextAsync(itemsAsString + inputText);
                 outputBox.Text = string.Empty;
                 string outputString = generatedText.Replace("\\n", "\n");
                 //string outputString = generatedText;
                 outputBox.Text += outputString;
             }
             PromptBox.Text = string.Empty;
-        }
-
-        private async Task<string> GenerateText(string inputText)
-        {
-            await pythonInput.WriteLineAsync("chat");
-            await pythonInput.WriteLineAsync(inputText);
-            await pythonInput.FlushAsync();
-
-            string response = await pythonOutput.ReadLineAsync();
-            if (response.StartsWith("$not_loaded$"))
-            {
-                return "Error: Model not loaded.";
-            }
-            else if (response.StartsWith("$response$"))
-            {
-                return response.Substring(response.IndexOf(':') + 1);
-            }
-            else if (response.StartsWith("$error$"))
-            {
-                return $"Error: {response.Substring(response.IndexOf(':') + 1)}";
-            }
-            //return "Unknown error occurred.";
-            return response;
         }
 
         private async void LoadModelButton_Click(object sender, RoutedEventArgs e)
@@ -131,20 +84,17 @@ namespace TarskyTGI
         }
         private async Task LoadModel(string modelPath)
         {
-            await pythonInput.WriteLineAsync("load");
-            await pythonInput.WriteLineAsync(modelPath);
-            await pythonInput.FlushAsync();
+            var (success, message) = await textGenerator.LoadModelAsync(modelPath, 35, "chatml");
 
-            string response = await pythonOutput.ReadLineAsync();
-            if (response.StartsWith("$model_loaded$"))
+            if (success)
             {
                 modelLoaded = true;
                 StatusTextBlock.Text = "LOADED.";
             }
-            else if (response.StartsWith("$model_load_error$"))
+            else
             {
                 modelLoaded = false;
-                StatusTextBlock.Text = $"Failed to load model: {response.Substring(response.IndexOf(':') + 1)}";
+                StatusTextBlock.Text = $"Failed to load model: {message}";
             }
         }
 

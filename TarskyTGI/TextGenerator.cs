@@ -1,21 +1,20 @@
+using ABI.System;
+using Newtonsoft.Json;
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
+using System.Net.Http;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace TarskyTGI
 {
     public sealed class TextGenerator : IDisposable
     {
-        private Process? pythonProcess;
-        private StreamWriter? pythonInput;
-        private StreamReader? pythonOutput;
-        private readonly ConcurrentQueue<string> messages = new();
-        private readonly SemaphoreSlim messageSignal = new(0);
-        private readonly CancellationTokenSource readLoopCts = new();
+        private Process? serverProcess;
+        private HttpClient httpClient = new HttpClient();
+        private int port = 8080;
 
         public bool IsModelLoaded { get; private set; } = false;
 
@@ -25,219 +24,201 @@ namespace TarskyTGI
 
         public void Initialize()
         {
-            if (pythonProcess != null) return;
+            // The server is started when a model is loaded
+        }
+
+        public async Task<(bool success, string message)> LoadModelAsync(string modelPath, int gpuLayers, string chatFormat, System.TimeSpan? timeout = null)
+        {
+            if (serverProcess != null && !serverProcess.HasExited)
+            {
+                serverProcess.Kill(true);
+            }
+
+            var arguments = new List<string>
+            {
+                $"-m \"{modelPath}\"",
+                $"--port {port}",
+                $"-np 1",
+                $"-ngl {gpuLayers}"
+            };
+            
+             if(!string.IsNullOrEmpty(chatFormat) && chatFormat != "default")
+            {
+                arguments.Add($"--chat-template {chatFormat}");
+            }
+
+
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = "python",
-                Arguments = "-u -X utf8 textgenerator.py",
+                FileName = "CompiledLlama\\llama-server.exe",
+                Arguments = string.Join(" ", arguments),
                 UseShellExecute = false,
-                RedirectStandardInput = true,
                 RedirectStandardOutput = true,
+                RedirectStandardError = true,
                 CreateNoWindow = true
             };
 
-            startInfo.StandardOutputEncoding = Encoding.UTF8;
-            startInfo.StandardInputEncoding = Encoding.UTF8;
-            startInfo.EnvironmentVariables["PYTHONUTF8"] = "1";
+            serverProcess = new Process { StartInfo = startInfo };
+            serverProcess.Start();
 
-            pythonProcess = new Process { StartInfo = startInfo };
-            pythonProcess.Start();
-
-            pythonInput = pythonProcess.StandardInput;
-            pythonOutput = pythonProcess.StandardOutput;
-
-            // Start background read loop
-            Task.Run(ReadLoopAsync, readLoopCts.Token);
-        }
-
-        private async Task ReadLoopAsync()
-        {
-            try
+            // ping address until 404
+            string address = $"http://localhost:{port}/nonexistentpage";
+            int attempt = 0;
+            int maxattempts = 10;
+            while (attempt <= maxattempts)
             {
-                if (pythonOutput == null) return;
-
-                while (!readLoopCts.IsCancellationRequested)
-                {
-                    string? line = await pythonOutput.ReadLineAsync();
-                    if (line == null) break;
-                    messages.Enqueue(line);
-                    messageSignal.Release();
-                }
-            }
-            catch
-            {
-                // swallow - Dispose will handle cleanup
-            }
-        }
-
-        private async Task<string?> WaitForPrefixAsync(string[] prefixes, TimeSpan timeout)
-        {
-            var sw = Stopwatch.StartNew();
-            while (sw.Elapsed < timeout)
-            {
-                // wait until a message is available or timeout shorter
-                var remaining = timeout - sw.Elapsed;
-                if (remaining <= TimeSpan.Zero) break;
+                attempt++;
                 try
                 {
-                    if (!await messageSignal.WaitAsync(remaining)) break;
-                }
-                catch (OperationCanceledException) { break; }
-
-                if (messages.TryDequeue(out var msg))
-                {
-                    foreach (var p in prefixes)
+                    HttpResponseMessage response = await httpClient.GetAsync(address);
+                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     {
-                        if (msg.StartsWith(p)) return msg;
+                        Console.WriteLine($"✅ Success on attempt #{attempt}: Received 404 Not Found!");
+                        IsModelLoaded = true;
+                        return (true, "Ready.");
+                        break; // Exit the loop
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    if (attempt >= 30)
+                    {
+                        return (false, ex.Message);
                     }
                 }
             }
-            return null;
+            return (false, $"Ran out of attempts to connect. {maxattempts} retries.");
         }
 
-        public async Task InsertSystemPromptAsync(string sysPrompt)
+        public async Task<(bool success, string message)> LoadModelLlavaAsync(string modelPath, string mmproj, int gpuLayers, int ctx, string chatFormat, System.TimeSpan? timeout = null)
         {
-            if (pythonInput == null) return;
-            await pythonInput.WriteLineAsync("system");
-            await pythonInput.WriteLineAsync(sysPrompt);
-            await pythonInput.FlushAsync();
-        }
-
-        public async Task<(bool success, string message)> LoadModelAsync(string modelPath, int gpuLayers, string chatFormat, TimeSpan? timeout = null)
-        {
-            timeout ??= TimeSpan.FromSeconds(60);
-            if (pythonInput == null) return (false, "Backend not initialized");
-
-            await pythonInput.WriteLineAsync("load");
-            await pythonInput.WriteLineAsync(modelPath);
-            await pythonInput.WriteLineAsync(gpuLayers.ToString());
-            await pythonInput.WriteLineAsync(chatFormat);
-            await pythonInput.FlushAsync();
-
-            var response = await WaitForPrefixAsync(new[] {"$model_loaded$", "$model_load_error$"}, timeout.Value);
-            if (response == null) return (false, "No response from backend.");
-
-            if (response.StartsWith("$model_loaded$"))
+            if (serverProcess != null && !serverProcess.HasExited)
             {
-                IsModelLoaded = true;
-                return (true, "Ready.");
+                serverProcess.Kill(true);
             }
-            else
+            Thread.Sleep(10);
+
+            var arguments = new List<string>
             {
-                IsModelLoaded = false;
-                var idx = response.IndexOf(':');
-                var msg = idx >= 0 ? response.Substring(idx + 1) : response;
-                return (false, msg);
+                $"-m \"{modelPath}\"",
+                $"--port {port}",
+                $"-np 1",
+                $"-c {ctx}",
+                $"-ngl {gpuLayers}"
+            };
+
+            if (!string.IsNullOrEmpty(mmproj))
+            {
+                arguments.Add($"--mmproj \"{mmproj}\"");
             }
+            if (!string.IsNullOrEmpty(chatFormat) && chatFormat != "default")
+            {
+                arguments.Add($"--chat-template {chatFormat}");
+            }
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "CompiledLlama\\llama-server.exe",
+                Arguments = string.Join(" ", arguments),
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
+
+            serverProcess = new Process { StartInfo = startInfo };
+            serverProcess.Start();
+
+            // Give the server some time to start
+            await Task.Delay(2000);
+
+            IsModelLoaded = true;
+            return (true, "Ready. Loaded with mmproj.");
         }
 
-        // New LLava-specific load signature: modelPath, mmproj, layers, ctx, cformat
-        public async Task<(bool success, string message)> LoadModelLlavaAsync(string modelPath, string mmproj, int gpuLayers, int ctx, string cformat, TimeSpan? timeout = null)
+        public Task InsertSystemPromptAsync(string sysPrompt)
         {
-            timeout ??= TimeSpan.FromSeconds(60);
-            if (pythonInput == null) return (false, "Backend not initialized");
-
-            await pythonInput.WriteLineAsync("load");
-            await pythonInput.WriteLineAsync(modelPath);
-            await pythonInput.WriteLineAsync(mmproj ?? string.Empty);
-            await pythonInput.WriteLineAsync(gpuLayers.ToString());
-            await pythonInput.WriteLineAsync(ctx.ToString());
-            await pythonInput.WriteLineAsync(cformat ?? string.Empty);
-            await pythonInput.FlushAsync();
-
-            var response = await WaitForPrefixAsync(new[] {"$model_loaded$", "$model_load_error$"}, timeout.Value);
-            if (response == null) return (false, "No response from backend.");
-
-            if (response.StartsWith("$model_loaded$"))
-            {
-                IsModelLoaded = true;
-                return (true, "Ready.");
-            }
-            else
-            {
-                IsModelLoaded = false;
-                var idx = response.IndexOf(':');
-                var msg = idx >= 0 ? response.Substring(idx + 1) : response;
-                return (false, msg);
-            }
+            // Not directly applicable to the llama.cpp server in the same way.
+            // System prompt is usually handled as part of the chat template.
+            return Task.CompletedTask;
         }
 
-        public async Task ClearAsync(string sysPrompt)
+        public Task ClearAsync(string sysPrompt)
         {
-            if (pythonInput == null) return;
-            await pythonInput.WriteLineAsync("clear");
-            await pythonInput.WriteLineAsync("append");
-            await pythonInput.WriteLineAsync("system");
-            await pythonInput.WriteLineAsync(sysPrompt);
-            await pythonInput.FlushAsync();
-            // don't wait for any ack - backend may not send one for clear
+            // Not directly applicable to the llama.cpp server.
+            return Task.CompletedTask;
         }
 
-        // Overload: support optional image path
-        public async Task<string> GenerateTextAsync(string inputText, string? imagePath = null, TimeSpan? timeout = null)
+        public async Task<string> GenerateTextAsync(string inputText, string? imagePath = null, System.TimeSpan? timeout = null)
         {
-            timeout ??= TimeSpan.FromSeconds(120);
-            if (pythonInput == null) return "Error: Backend not initialized.";
-
-            await pythonInput.WriteLineAsync("chat");
-            await pythonInput.WriteLineAsync(inputText);
-            // always send an image line to keep protocol consistent
-            await pythonInput.WriteLineAsync(imagePath ?? "None");
-            await pythonInput.FlushAsync();
-
-            var response = await WaitForPrefixAsync(new[] {"$response$", "$not_loaded$", "$error$"}, timeout.Value);
-            if (response == null) return "Error: No response from backend.";
-
-            if (response.StartsWith("$not_loaded$"))
+            if (!IsModelLoaded || serverProcess == null || serverProcess.HasExited)
             {
                 return "Error: Model not loaded.";
             }
-            else if (response.StartsWith("$response$"))
+
+            var payload = new
             {
-                var idx = response.IndexOf(':');
-                var content = idx >= 0 ? response.Substring(idx + 1) : string.Empty;
-                // replace any placeholder newline tokens with environment newlines
-                content = content.Replace("/[newline]", Environment.NewLine);
+                prompt = inputText,
+                n_predict = -1,
+                temperature = 0.8,
+                stream = false
+            };
 
-                // Collect subsequent non-control lines (if the backend streams the rest as plain lines)
-                // but stop if the next message starts with '$'
-                while (true)
-                {
-                    // peek if there is a message already queued
-                    if (messageSignal.CurrentCount == 0) break;
-                    // wait a short time to see if there are more lines
-                    if (!await messageSignal.WaitAsync(TimeSpan.FromMilliseconds(50))) break;
-                    if (messages.TryDequeue(out var next))
-                    {
-                        if (next.StartsWith("$"))
-                        {
-                            // push it back by enqueuing and releasing
-                            messages.Enqueue(next);
-                            messageSignal.Release();
-                            break;
-                        }
-                        content += Environment.NewLine + next;
-                    }
-                }
+            var jsonPayload = JsonConvert.SerializeObject(payload);
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-                return content;
+            try
+            {
+                var response = await httpClient.PostAsync($"http://localhost:{port}/completion", content);
+                response.EnsureSuccessStatusCode();
+                var responseString = await response.Content.ReadAsStringAsync();
+                var responseObject = JsonConvert.DeserializeObject<CompletionResponse>(responseString);
+                return responseObject?.Content ?? "Error: Empty response from server.";
             }
-            else if (response.StartsWith("$error$"))
+            catch (HttpRequestException e)
             {
-                var idx = response.IndexOf(':');
-                var msg = idx >= 0 ? response.Substring(idx + 1) : response;
-                return $"Error: {msg}";
+                return $"Error: {e.Message}";
+            }
+        }
+
+        public async Task<string> GenerateChatCompletionAsync(List<ChatMessage> messages, System.TimeSpan? timeout = null)
+        {
+            if (!IsModelLoaded || serverProcess == null || serverProcess.HasExited)
+            {
+                return "Error: Model not loaded.";
             }
 
-            return response;
+            var payload = new
+            {
+                messages = messages,
+                n_predict = -1,
+                temperature = 0.8,
+                stream = false
+            };
+
+            var jsonPayload = JsonConvert.SerializeObject(payload);
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+            try
+            {
+                var response = await httpClient.PostAsync($"http://localhost:{port}/chat/completions", content);
+                response.EnsureSuccessStatusCode();
+                var responseString = await response.Content.ReadAsStringAsync();
+                var responseObject = JsonConvert.DeserializeObject<ChatCompletionResponse>(responseString);
+                return responseObject?.choices[0]?.message?.content ?? "Error: Empty response from server.";
+            }
+            catch (HttpRequestException e)
+            {
+                return $"Error: {e.Message}";
+            }
         }
 
         public void SetProcessPriority(ProcessPriorityClass priority)
         {
-            if (pythonProcess != null)
+            if (serverProcess != null)
             {
-                try { pythonProcess.PriorityClass = priority; } catch { }
+                try { serverProcess.PriorityClass = priority; } catch { }
             }
         }
 
@@ -245,24 +226,35 @@ namespace TarskyTGI
         {
             try
             {
-                readLoopCts.Cancel();
-            }
-            catch { }
-
-            try
-            {
-                if (pythonProcess != null && !pythonProcess.HasExited)
+                if (serverProcess != null && !serverProcess.HasExited)
                 {
-                    pythonProcess.Kill(true);
+                    serverProcess.Kill(true);
                 }
             }
             catch { }
+            serverProcess?.Dispose();
+            httpClient?.Dispose();
+        }
 
-            try { pythonInput?.Dispose(); } catch { }
-            try { pythonOutput?.Dispose(); } catch { }
-            try { pythonProcess?.Dispose(); } catch { }
-            try { messageSignal.Dispose(); } catch { }
-            try { readLoopCts.Dispose(); } catch { }
+        private class CompletionResponse
+        {
+            public string? Content { get; set; }
+        }
+
+        public class ChatMessage
+        {
+            public string role { get; set; }
+            public string content { get; set; }
+        }
+
+        private class ChatCompletionResponse
+        {
+            public List<Choice>? choices { get; set; }
+        }
+
+        private class Choice
+        {
+            public ChatMessage? message { get; set; }
         }
     }
 }
