@@ -6,57 +6,110 @@
     xmlns:local="using:TarskyTGI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    mc:Ignorable="d">
 
     <Grid>
-        <!--define rows and columns-->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="70"/>
-            <ColumnDefinition Width="70"/>
+            <ColumnDefinition Width="300"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="55"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!--Base interface done with textbox-->
-        <TextBox
-            x:Name="mainText"
-            Grid.Row="0"
-            AcceptsReturn="True"
-            TextWrapping="Wrap"/>
+        <!-- Main text area -->
+        <TextBox x:Name="mainText"
+                 Grid.Row="0" Grid.Column="0"
+                 Margin="0,0,10,0"
+                 TextWrapping="Wrap"
+                 AcceptsReturn="True"
+                 IsReadOnly="True"
+                 Background="Transparent"
+                 BorderThickness="0"/>
 
-        <!--Side bar-->
-        <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="2" VerticalAlignment="Top">
-            <TextBlock x:Name="StatusTextBlock" Text="Not loaded"/>
-            <Button x:Name="loadbtn" Content="Start" Click="LoadModelButton_Click"/>
-            <StackPanel Orientation="Horizontal">
-                <TextBox x:Name="ModelBox" Width="100" PlaceholderText="Model path" TextChanged="ModelBox_TextChanged"/>
-                <Button x:Name="selectModelButton" Content="📁" Click="selectModelButton_Click"/>
+        <!-- Bottom input area -->
+        <Grid Grid.Row="1" Grid.Column="0" Margin="0,10,10,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="PromptBox"
+                     PlaceholderText="Type a message (Shift+Enter for new line)..."
+                     PreviewKeyDown="PromptBox_KeyDown"
+                     MinHeight="50"
+                     MaxHeight="150"
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"
+                     Grid.Column="0"/>
+
+            <Button Content="Send" Click="SendFN" Style="{StaticResource AccentButtonStyle}" Height="50" Width="70" Margin="10,0,0,0" Grid.Column="1"/>
+            <Button Content="Clear" Click="ClearFN" Height="50" Width="70" Margin="10,0,0,0" Grid.Column="2"/>
+        </Grid>
+
+        <!-- Right sidebar -->
+        <ScrollViewer Grid.Column="1" Grid.RowSpan="2" VerticalScrollBarVisibility="Auto" Padding="10,0,0,0">
+            <StackPanel Spacing="10">
+
+                <TextBlock Text="Status" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBox x:Name="StatusTextBlock" Text="Not loaded." IsReadOnly="True" Background="#11FFFFFF"/>
+
+                <MenuFlyoutSeparator/>
+
+                <TextBlock Text="Model Setup" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBox x:Name="ModelBox" PlaceholderText="Model path (.gguf)" TextChanged="ModelBox_TextChanged"/>
+                    <Button x:Name="selectModelButton" Click="selectModelButton_Click" Grid.Column="1" Margin="5,0,0,0">
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE8B7;" FontSize="20" />
+                    </Button>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBox x:Name="gpuLayers" Header="GPU Layers" Text="0" Margin="0,0,5,0"/>
+                    <Button x:Name="loadbtn" Content="Load Model" Click="LoadModelButton_Click" Grid.Column="1" Margin="5,0,0,0" 
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Bottom"/>
+                </Grid>
+
+                <MenuFlyoutSeparator/>
+
+                <Expander Header="Generation Parameters" HorizontalAlignment="Stretch" IsExpanded="True">
+                    <StackPanel Spacing="8">
+                        <TextBox x:Name="predictBox" Header="Max. prediction tokens" 
+                                 PlaceholderText="n_predict (-1 for default)" 
+                                 Text="128" 
+                                 BeforeTextChanging="TextBox_BeforeTextChanging" 
+                                 TextChanged="ModelBox_TextChanged"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Context Size (n_ctx)" VerticalAlignment="Center"/>
+                            <TextBox x:Name="ctxBox" Text="1024" Width="60" BeforeTextChanging="TextBox_BeforeTextChanging" Grid.Column="1" Margin="10,0,0,0"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Temperature" VerticalAlignment="Center"/>
+                            <TextBox x:Name="temperatureBox" Text="0.8" Width="60" BeforeTextChanging="TextBox2_BeforeTextChanging" Grid.Column="1" Margin="10,0,0,0"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Top P" VerticalAlignment="Center"/>
+                            <TextBox x:Name="toppBox" Text="0.95" Width="60" BeforeTextChanging="TextBox2_BeforeTextChanging" Grid.Column="1" Margin="10,0,0,0"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Min P" VerticalAlignment="Center"/>
+                            <TextBox x:Name="minpBox" Text="0.05" Width="60" BeforeTextChanging="TextBox2_BeforeTextChanging" Grid.Column="1" Margin="10,0,0,0"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Typical P" VerticalAlignment="Center"/>
+                            <TextBox x:Name="typicalpBox" Text="1" Width="60" BeforeTextChanging="TextBox2_BeforeTextChanging" Grid.Column="1" Margin="10,0,0,0"/>
+                        </Grid>
+                    </StackPanel>
+                </Expander>
             </StackPanel>
-            <TextBox x:Name="ctxBox" Width="140" PlaceholderText="n_ctx" Text="1024" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
-            <TextBox x:Name="predictBox" Width="140" PlaceholderText="n_predict" Text="128" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
-            <TextBox x:Name="temperatureBox" Width="140" PlaceholderText="temperature" Text="0.8" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
-            <TextBox x:Name="toppBox" Width="140" PlaceholderText="top_p" Text="0.95" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
-            <TextBox x:Name="minpBox" Width="140" PlaceholderText="min_p" Text="0.05" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
-            <TextBox x:Name="typicalpBox" Width="140" PlaceholderText="typical_p" Text="1" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
-        </StackPanel>
-
-        <!--Bottom stuff-->
-        <TextBox PlaceholderText="Your prompt here. Shift+Enter to newline."
-         PreviewKeyDown="PromptBox_KeyDown"
-         Height="50" 
-         HorizontalAlignment="Stretch" 
-         VerticalAlignment="Stretch" 
-         Grid.Column="0" Grid.Row="1" 
-         x:Name="PromptBox" 
-         TextWrapping="Wrap"
-         AcceptsReturn="True"
-         />
-
-        <Button HorizontalAlignment="Stretch" Content="Send" Grid.Column="1" Grid.Row="1" Click="SendFN"/>
-        <Button HorizontalAlignment="Stretch" Content="Clear" Grid.Column="2" Grid.Row="1" Click="ClearFN"/>
+        </ScrollViewer>
     </Grid>
 </Page>

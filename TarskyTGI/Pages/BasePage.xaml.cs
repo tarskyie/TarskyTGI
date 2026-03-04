@@ -1,44 +1,27 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Storage.Pickers;
 using Windows.Storage;
 using WinRT.Interop;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace TarskyTGI
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class BasePage : Page
     {
-        private Process? pythonProcess;
-        private StreamWriter? pythonInput;
-        private StreamReader? pythonOutput;
+        private TextGenerator textGenerator = new TextGenerator();
         private JsonService jsonService = new JsonService();
         private bool modelLoaded = false;
 
         public BasePage()
         {
             this.InitializeComponent();
-            InitializePythonProcess();
+            textGenerator.Initialize();
             loadJson();
             if (App.m_window != null)
             {
@@ -49,43 +32,47 @@ namespace TarskyTGI
 
         private void loadJson()
         {
-            string jsonString = File.ReadAllText("basestuff.json");
-            ChatClass? jsonToLoad = JsonSerializer.Deserialize<ChatClass?>(jsonString);
-
-            if (jsonToLoad is null)
+            try
             {
-                StatusTextBlock.Text = "Chat configuration is empty or invalid. Restoring default configuration.";
-                jsonService.copyJsonToDocuments("chat.json");
-                return;
-            }
-
-            ModelBox.Text = jsonToLoad.model;
-            ctxBox.Text = jsonToLoad.n_ctx.ToString();
-            predictBox.Text = jsonToLoad.n_predict.ToString();
-            temperatureBox.Text = jsonToLoad.temperature.ToString();
-            toppBox.Text = jsonToLoad.top_p.ToString();
-            minpBox.Text = jsonToLoad.min_p.ToString();
-            typicalpBox.Text = jsonToLoad.typical_p.ToString();
-        }
-
-        private void InitializePythonProcess()
-        {
-            pythonProcess = new Process
-            {
-                StartInfo = new ProcessStartInfo
+                jsonService.EnsureJsonExists("basestuff.json", "basestuff.json");
+                string path = jsonService.GetJsonFilePath("basestuff.json");
+                if (!File.Exists(path))
                 {
-                    FileName = "py",
-                    Arguments = "basegenerator.py",
-                    UseShellExecute = false,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
+                    StatusTextBlock.Text = "Configuration file not found; using defaults.";
+                    return;
                 }
-            };
 
-            pythonProcess.Start();
-            pythonInput = pythonProcess.StandardInput;
-            pythonOutput = pythonProcess.StandardOutput;
+                string jsonString = File.ReadAllText(path);
+                ChatClass? jsonToLoad = null;
+                try
+                {
+                    jsonToLoad = JsonSerializer.Deserialize<ChatClass?>(jsonString);
+                }
+                catch (Exception ex)
+                {
+                    StatusTextBlock.Text = "Chat configuration is invalid: " + ex.Message;
+                }
+
+                if (jsonToLoad is null)
+                {
+                    StatusTextBlock.Text = "Chat configuration is empty or invalid. Restoring default configuration.";
+                    // ensure default exists in Documents
+                    jsonService.EnsureJsonExists("basestuff.json", "basestuff.json");
+                    return;
+                }
+
+                ModelBox.Text = jsonToLoad.model ?? string.Empty;
+                ctxBox.Text = jsonToLoad.n_ctx.ToString();
+                predictBox.Text = jsonToLoad.n_predict.ToString();
+                temperatureBox.Text = jsonToLoad.temperature.ToString();
+                toppBox.Text = jsonToLoad.top_p.ToString();
+                minpBox.Text = jsonToLoad.min_p.ToString();
+                typicalpBox.Text = jsonToLoad.typical_p.ToString();
+            }
+            catch (Exception ex)
+            {
+                StatusTextBlock.Text = "Config Load Error: " + ex.Message;
+            }
         }
 
         private async void LoadModelButton_Click(object sender, RoutedEventArgs e)
@@ -97,31 +84,17 @@ namespace TarskyTGI
 
         private async Task LoadModel(string modelPath)
         {
-            if (pythonInput == null || pythonOutput == null)
-            {
-                StatusTextBlock.Text = "Error: Python process not initialized.";
-                return;
-            }
-
-            await pythonInput.WriteLineAsync("load");
-            await pythonInput.WriteLineAsync(modelPath);
-            await pythonInput.FlushAsync();
-
-            string ?response = await pythonOutput.ReadLineAsync();
-            if (response == null)
-            {
-                StatusTextBlock.Text = "Error: No response from model.";
-                return;
-            }
-            if (response.StartsWith("$model_loaded$"))
+            StatusTextBlock.Text = "Loading.";
+            var (success, message) = await textGenerator.LoadModelAsync(modelPath, int.Parse(gpuLayers.Text), ctx: int.Parse(ctxBox.Text));
+            if (success)
             {
                 modelLoaded = true;
-                StatusTextBlock.Text = "LOADED.";
+                StatusTextBlock.Text = "Ready.";
             }
-            else if (response.StartsWith("$model_load_error$"))
+            else
             {
                 modelLoaded = false;
-                StatusTextBlock.Text = $"Failed to load model: {response.Substring(response.IndexOf(':') + 1)}";
+                StatusTextBlock.Text = $"Failed to load model: {message}";
             }
         }
 
@@ -133,21 +106,27 @@ namespace TarskyTGI
         {
             if (PromptBox.Text.Trim() != string.Empty)
             {
-                mainText.Text=mainText.Text+PromptBox.Text.Trim();
                 if (!modelLoaded)
                 {
                     StatusTextBlock.Text = "Please load a model first.";
                     return;
                 }
 
-                string inputText = PromptBox.Text.Trim();
-                string itemsAsString = mainText.Text;
-                string generatedText = await GenerateText(itemsAsString + inputText);
+                mainText.Text += PromptBox.Text.Trim();
+                PromptBox.Text = string.Empty;
+
+                StatusTextBlock.Text = "Generating the text";
+                string generatedText = await textGenerator.GenerateTextAsync(mainText.Text, num_predict: int.Parse(predictBox.Text));
                 string outputString = generatedText.Replace("\\n", "\n");
                 //string outputString = generatedText;
                 mainText.Text += outputString;
+
+                StatusTextBlock.Text = "Ready.";
             }
-            PromptBox.Text = string.Empty;
+            else
+            {
+                StatusTextBlock.Text = "Empty prompt";
+            }
         }
         private void PromptBox_KeyDown(object sender, KeyRoutedEventArgs e)
         {
@@ -158,55 +137,9 @@ namespace TarskyTGI
             }
         }
 
-        private async Task<string> GenerateText(string inputText)
+        private void Window_Closed(object sender, WindowEventArgs args)
         {
-            if (pythonInput == null || pythonOutput == null)
-            {
-                return "Error: Python process not initialized.";
-            }
-            await pythonInput.WriteLineAsync("chat");
-            await pythonInput.WriteLineAsync(inputText);
-            await pythonInput.FlushAsync();
-
-            string? response = await pythonOutput.ReadLineAsync();
-            if (response == null)
-            {
-                return "Error: No response from model.";
-            }
-            if (response.StartsWith("$not_loaded$"))
-            {
-                return "Error: Model not loaded.";
-            }
-            else if (response.StartsWith("$response$"))
-            {
-                return response.Substring(response.IndexOf(':') + 1);
-            }
-            else if (response.StartsWith("$error$"))
-            {
-                return $"Error: {response.Substring(response.IndexOf(':') + 1)}";
-            }
-            //return "Unknown error occurred.";
-            return response;
-        }
-
-        string GetListBoxItemsAsNewlineSeparatedString(ListBox listBox)
-        {
-            return string.Join("\\n", listBox.Items.Cast<object>().Select(item => item.ToString()));
-        }
-
-        private async void Window_Closed(object sender, WindowEventArgs args)
-        {
-            if (pythonProcess != null && !pythonProcess.HasExited && pythonInput != null)
-            {
-                await pythonInput.WriteLineAsync("exit");
-                await pythonInput.FlushAsync();
-                pythonProcess.WaitForExit(1000);
-                if (!pythonProcess.HasExited)
-                {
-                    pythonProcess.Kill();
-                }
-                pythonProcess.Dispose();
-            }
+            textGenerator.Dispose();
         }
 
         private void BasePage_Unloaded(object? sender, RoutedEventArgs e)
@@ -216,6 +149,7 @@ namespace TarskyTGI
                 App.m_window.Closed -= Window_Closed;
                 this.Unloaded -= BasePage_Unloaded;
             }
+            textGenerator.Dispose();
         }
 
         //Additional SideBar stuff
@@ -223,11 +157,19 @@ namespace TarskyTGI
         {
             try
             {
-                var chatClass = new ChatClass(ModelBox.Text.Trim(), "chatml", int.Parse(ctxBox.Text), int.Parse(predictBox.Text), float.Parse(temperatureBox.Text), float.Parse(toppBox.Text), float.Parse(minpBox.Text), float.Parse(typicalpBox.Text), 35);
+                int n_ctx = int.TryParse(ctxBox.Text, out var tmpCtx) ? tmpCtx : 1024;
+                int n_predict = int.TryParse(predictBox.Text, out var tmpPredict) ? tmpPredict : 128;
+                float temperature = float.TryParse(temperatureBox.Text, out var tmpTemp) ? tmpTemp : 0.8f;
+                float top_p = float.TryParse(toppBox.Text, out var tmpTopP) ? tmpTopP : 0.95f;
+                float min_p = float.TryParse(minpBox.Text, out var tmpMinP) ? tmpMinP : 0.05f;
+                float typical_p = float.TryParse(typicalpBox.Text, out var tmpTypicalP) ? tmpTypicalP : 1.0f;
+
+                var chatClass = new ChatClass(ModelBox.Text.Trim(), "chatml", n_ctx, n_predict, temperature, top_p, min_p, typical_p, 35);
 
                 string jsonString = JsonSerializer.Serialize(chatClass);
 
-                File.WriteAllText("basestuff.json", jsonString);
+                string path = jsonService.GetJsonFilePath("basestuff.json");
+                File.WriteAllText(path, jsonString);
             }
             catch { }
         }

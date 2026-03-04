@@ -18,31 +18,24 @@ namespace TarskyTGI
 {
     public sealed partial class MainWindow : Window
     {
-        private readonly string[] processNames = { "python", "WebView2" };
+        private readonly string[] processNames = { "llama-server", "WebView2" };
         private readonly Dictionary<string, Type> navigationMap = new()
             {
                 { "ChatApp", typeof(ChatPage) },
-                { "LlavaApp", typeof(LlavaPage) },
-                { "InstructApp", typeof(InstructPage) },
                 { "BaseApp", typeof(BasePage) },
                 { "HostApp", typeof(HostPage) },
-                { "HomeApp", typeof(HomePage) }
+                { "HomeApp", typeof(HomePage) },
+                { "OpenAiApp", typeof(OpenAiPage) }
             };
-
-        private SystemBackdropConfiguration backdropConfiguration;
-        private MicaController micaController;
 
         public MainWindow()
         {
-            //TrySetMicaBackdrop();
             this.InitializeComponent();
             this.Activated += MainWindow_Activated;
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
             ContentFrame.Navigate(typeof(HomePage));
         }
-
-        // ...
 
         private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
         {
@@ -55,7 +48,7 @@ namespace TarskyTGI
         private async void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
             
-            if (args.SelectedItemContainer != null && navigationMap.TryGetValue(args.SelectedItemContainer.Tag.ToString(), out Type pageType))
+            if (args.SelectedItemContainer?.Tag is string tag && navigationMap.TryGetValue(tag, out Type? pageType) && pageType != null)
             {
                 await TerminateProcessesAsync();
                 ContentFrame.IsEnabled = false;

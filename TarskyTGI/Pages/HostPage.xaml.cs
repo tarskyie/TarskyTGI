@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Windows.Storage.Pickers;
 using Windows.Storage;
 using WinRT.Interop;
+using System.Collections.Generic;
 
 namespace TarskyTGI.Pages
 {
@@ -35,10 +36,21 @@ namespace TarskyTGI.Pages
 
                 StatusTextBlock.Text = "Starting server...";
 
+                var arguments = new List<string>
+                {
+                    $"-m \"{modelPath}\"",
+                    $"--host {host}",
+                    $"--port {port}",
+                    $"-np 1",
+                    $"-c {ctxBox.Text}",
+                    $"-ngl {gpuLayers.Text}"
+                    //$"--chat-template {getChatFormatByIndex(formatBox, formatBox.SelectedIndex)}"
+                };
+
                 var startInfo = new ProcessStartInfo
                 {
-                    FileName = "python",
-                    Arguments = $"-u -X utf8 server.py --model \"{modelPath}\" --ctx-size {ctxBox.Text} --n-gpu-layers {gpuLayers.Text} --host {host} --port {port} --key {KeyBox.Text} --format {getChatFormatByIndex(formatBox, formatBox.SelectedIndex)}",
+                    FileName = "CompiledLlama\\llama-server.exe",
+                    Arguments = string.Join(" ", arguments),
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -49,12 +61,12 @@ namespace TarskyTGI.Pages
                 serverProcess.OutputDataReceived += (s, ev) =>
                 {
                     if (!string.IsNullOrEmpty(ev.Data))
-                        DispatcherQueue.TryEnqueue(() => StatusTextBlock.Text = ev.Data);
+                        DispatcherQueue.TryEnqueue(() => StatusTextBlock.Text += "\n" + ev.Data);
                 };
                 serverProcess.ErrorDataReceived += (s, ev) =>
                 {
                     if (!string.IsNullOrEmpty(ev.Data))
-                        DispatcherQueue.TryEnqueue(() => StatusTextBlock.Text = "Error: " + ev.Data);
+                        DispatcherQueue.TryEnqueue(() => StatusTextBlock.Text += "\n" + ev.Data);
                 };
 
                 serverProcess.Start();
@@ -62,7 +74,8 @@ namespace TarskyTGI.Pages
                 serverProcess.BeginOutputReadLine();
                 serverProcess.BeginErrorReadLine();
 
-                StatusTextBlock.Text = $"Server running at http://{host}:{port}/v1";
+                StatusTextBlock.Text = $"Server running at http://{host}:{port}/";
+                return;
             }
             catch (Exception ex)
             {
