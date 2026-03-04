@@ -86,7 +86,7 @@ namespace TarskyTGI
         private async Task LoadModel(string modelPath)
         {
             StatusTextBlock.Text = "Loading.";
-            var (success, message) = await textGenerator.LoadModelAsync(modelPath, 0, "default");
+            var (success, message) = await textGenerator.LoadModelAsync(modelPath, int.Parse(gpuLayers.Text), "default");
             if (success)
             {
                 modelLoaded = true;
