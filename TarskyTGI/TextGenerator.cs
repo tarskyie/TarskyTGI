@@ -4,9 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
+using Windows.Media.Protection.PlayReady;
 
 namespace TarskyTGI
 {
@@ -159,19 +162,6 @@ namespace TarskyTGI
             return (false, $"Ran out of attempts to connect. {maxattempts} retries.");
         }
 
-        public Task InsertSystemPromptAsync(string sysPrompt)
-        {
-            // Not directly applicable to the llama.cpp server in the same way.
-            // System prompt is usually handled as part of the chat template.
-            return Task.CompletedTask;
-        }
-
-        public Task ClearAsync(string sysPrompt)
-        {
-            // Not directly applicable to the llama.cpp server.
-            return Task.CompletedTask;
-        }
-
         public async Task<string> GenerateTextAsync(string inputText, string? imagePath = null, int? num_predict = -1, System.TimeSpan? timeout = null)
         {
             if (!IsModelLoaded || serverProcess == null || serverProcess.HasExited)
@@ -234,6 +224,89 @@ namespace TarskyTGI
             {
                 return $"Error: {e.Message}";
             }
+        }
+
+        public static async Task<string> GetChatCompletionAsync(
+            List<ChatMessage> messages,
+            string apiKey,
+            string model,
+            double? temperature = 0.8,
+            double? topP = 0.95,
+            int? maxTokens = null,
+            string baseUrl = "https://api.openai.com/v1",
+            CancellationToken cancellationToken = default)
+        {
+            using var openAiClient = new HttpClient();
+            openAiClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", apiKey);
+            openAiClient.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var requestBody = new
+            {
+                model,
+                messages = messages.ConvertAll(m => new
+                {
+                    role = m.role.ToLowerInvariant(),
+                    content = m.content
+                }),
+                temperature,
+                top_p = topP,
+                max_tokens = maxTokens,
+                stream = false
+            };
+
+            var json = System.Text.Json.JsonSerializer.Serialize(requestBody, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition =
+                    System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            });
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            string endpoint = $"{baseUrl.TrimEnd('/')}/chat/completions";
+
+            HttpResponseMessage response;
+
+            try
+            {
+                response = await openAiClient
+                    .PostAsync(endpoint, content, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new System.Exception($"Failed to connect to API: {ex.Message}", ex);
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string errorBody =
+                    await response.Content.ReadAsStringAsync(cancellationToken);
+                throw new HttpRequestException(
+                    $"API error {response.StatusCode}: {errorBody}");
+            }
+
+            string responseJson =
+                await response.Content.ReadAsStringAsync(cancellationToken);
+
+            using var doc = JsonDocument.Parse(responseJson);
+
+            var choices = doc.RootElement.GetProperty("choices");
+
+            if (choices.GetArrayLength() == 0)
+                throw new System.Exception("No choices returned from API");
+
+            var message = choices[0].GetProperty("message");
+
+            string assistantReply =
+                message.GetProperty("content").GetString() ?? string.Empty;
+
+            return assistantReply.Trim();
+
+            // Ensures compiler sees all paths returning
+            throw new InvalidOperationException("Unexpected execution path.");
         }
 
         public void SetProcessPriority(ProcessPriorityClass priority)

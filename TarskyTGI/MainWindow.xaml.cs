@@ -22,27 +22,20 @@ namespace TarskyTGI
         private readonly Dictionary<string, Type> navigationMap = new()
             {
                 { "ChatApp", typeof(ChatPage) },
-                { "LlavaApp", typeof(LlavaPage) },
-                { "InstructApp", typeof(InstructPage) },
                 { "BaseApp", typeof(BasePage) },
                 { "HostApp", typeof(HostPage) },
-                { "HomeApp", typeof(HomePage) }
+                { "HomeApp", typeof(HomePage) },
+                { "OpenAiApp", typeof(OpenAiPage) }
             };
-
-        private SystemBackdropConfiguration backdropConfiguration;
-        private MicaController micaController;
 
         public MainWindow()
         {
-            //TrySetMicaBackdrop();
             this.InitializeComponent();
             this.Activated += MainWindow_Activated;
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
             ContentFrame.Navigate(typeof(HomePage));
         }
-
-        // ...
 
         private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
         {

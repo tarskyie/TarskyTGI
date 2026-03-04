@@ -19,7 +19,6 @@
         <StackPanel Grid.Row="1" Orientation="Vertical" Spacing="10" Margin="0,20,0,0">
             <TextBlock FontSize="20" Text="Get Started"/>
             <Button Content="Go to Chat Page" Click="NavigateToChatPage_Click"/>
-            <Button Content="Go to Instruct Page" Click="NavigateToInstructPage_Click"/>
         </StackPanel>
     </Grid>
 </Page>

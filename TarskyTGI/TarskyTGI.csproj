@@ -28,6 +28,7 @@
     <None Remove="HostPage.xaml" />
     <None Remove="InstructPage.xaml" />
     <None Remove="Pages\HostPage.xaml" />
+    <None Remove="Pages\OpenAiPage.xaml" />
   </ItemGroup> 
 
   <ItemGroup>
@@ -91,6 +92,9 @@
     <None Update="CompiledLlama\mtmd.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Pages\OpenAiPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <None Update="server.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

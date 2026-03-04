@@ -14,10 +14,5 @@ namespace TarskyTGI
         {
             Frame.Navigate(typeof(ChatPage));
         }
-
-        private void NavigateToInstructPage_Click(object sender, RoutedEventArgs e)
-        {
-            Frame.Navigate(typeof(InstructPage));
-        }
     }
 }

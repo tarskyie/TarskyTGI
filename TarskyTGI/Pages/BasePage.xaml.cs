@@ -34,7 +34,6 @@ namespace TarskyTGI
         {
             try
             {
-                // Ensure the basestuff.json exists in Documents; if not copy default from app folder
                 jsonService.EnsureJsonExists("basestuff.json", "basestuff.json");
                 string path = jsonService.GetJsonFilePath("basestuff.json");
                 if (!File.Exists(path))

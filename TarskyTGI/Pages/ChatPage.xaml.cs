@@ -22,14 +22,12 @@ namespace TarskyTGI
         private string? currentImgPath = null; // Stores current image for the next prompt
         private string jsonPath;
         private JsonService jsonService = new JsonService();
-        private string sysPrompt = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.";
 
         public ChatPage()
         {
             this.InitializeComponent();
             textGenerator = new TextGenerator();
             textGenerator.Initialize();
-            _ = textGenerator.InsertSystemPromptAsync(sysPrompt);
 
             jsonPath = jsonService.GetJsonFilePath("chat.json");
             LoadJson();
@@ -147,10 +145,6 @@ namespace TarskyTGI
 
         private async void ClearFN(object sender, RoutedEventArgs e)
         {
-            if (textGenerator != null)
-            {
-                await textGenerator.ClearAsync(sysPrompt);
-            }
             ChatHistory.Items.Clear();
             ClearImage();
         }
@@ -181,7 +175,7 @@ namespace TarskyTGI
 
             var messages = new List<TextGenerator.ChatMessage>
             {
-                new TextGenerator.ChatMessage { role = "system", content = sysPrompt }
+                new TextGenerator.ChatMessage { role = "system", content = systemPromptTextBox.Text }
             };
 
             for (int i = 0; i < ChatHistory.Items.Count; i++)
