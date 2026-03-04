@@ -48,7 +48,7 @@ namespace TarskyTGI
         private async void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
             
-            if (args.SelectedItemContainer != null && navigationMap.TryGetValue(args.SelectedItemContainer.Tag.ToString(), out Type pageType))
+            if (args.SelectedItemContainer?.Tag is string tag && navigationMap.TryGetValue(tag, out Type? pageType) && pageType != null)
             {
                 await TerminateProcessesAsync();
                 ContentFrame.IsEnabled = false;

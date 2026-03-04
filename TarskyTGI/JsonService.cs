@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +32,7 @@ namespace TarskyTGI
             return Path.Combine(jsonFolder, jsonFileName);
         }
 
-        public void EnsureJsonExists(string jsonFileName, string defaultSource = null)
+        public void EnsureJsonExists(string jsonFileName, string? defaultSource = null)
         {
             var target = GetJsonFilePath(jsonFileName);
             if (!File.Exists(target))

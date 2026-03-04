@@ -181,15 +181,18 @@ namespace TarskyTGI
             for (int i = 0; i < ChatHistory.Items.Count; i++)
             {
                 var item = ChatHistory.Items[i] as string;
-                if (i % 2 == 0)
+                if (item != null)
                 {
-                    // Replace direct object initializer with CreateMessage helper
-                    messages.Add(TextGenerator.CreateMessage("user", item, imagePath: currentImgPath));
+                    if (i % 2 == 0)
+                    {
+                        // Replace direct object initializer with CreateMessage helper
+                        messages.Add(TextGenerator.CreateMessage("user", item, imagePath: currentImgPath));
                     
-                }
-                else
-                {
-                    messages.Add(TextGenerator.CreateMessage("assistant", item));
+                    }
+                    else
+                    {
+                        messages.Add(TextGenerator.CreateMessage("assistant", item));
+                    }
                 }
             }
 
