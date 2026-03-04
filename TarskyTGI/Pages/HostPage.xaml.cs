@@ -61,12 +61,12 @@ namespace TarskyTGI.Pages
                 serverProcess.OutputDataReceived += (s, ev) =>
                 {
                     if (!string.IsNullOrEmpty(ev.Data))
-                        DispatcherQueue.TryEnqueue(() => StatusTextBlock.Text += ev.Data);
+                        DispatcherQueue.TryEnqueue(() => StatusTextBlock.Text += "\n" + ev.Data);
                 };
                 serverProcess.ErrorDataReceived += (s, ev) =>
                 {
                     if (!string.IsNullOrEmpty(ev.Data))
-                        DispatcherQueue.TryEnqueue(() => StatusTextBlock.Text += "Error: " + ev.Data);
+                        DispatcherQueue.TryEnqueue(() => StatusTextBlock.Text += "\n" + ev.Data);
                 };
 
                 serverProcess.Start();
@@ -75,6 +75,7 @@ namespace TarskyTGI.Pages
                 serverProcess.BeginErrorReadLine();
 
                 StatusTextBlock.Text = $"Server running at http://{host}:{port}/";
+                return;
             }
             catch (Exception ex)
             {

@@ -14,30 +14,31 @@
                Margin="0,0,0,12"/>
 
                 <!-- Model Selection -->
-                <Expander Header="Model Configuration" IsExpanded="True">
+                <Expander Header="Model Configuration" IsExpanded="True" MinWidth="500">
                     <StackPanel Orientation="Vertical" Spacing="8" Padding="8">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <TextBox x:Name="ModelBox" Width="300" PlaceholderText="Model path"/>
+                            <TextBox x:Name="ModelBox" Header="Model path" Width="300" PlaceholderText="Model path"/>
                             <Button x:Name="selectModelButton" Content="Browse..." Click="selectModelButton_Click"/>
                         </StackPanel>
                     </StackPanel>
                 </Expander>
 
                 <!-- Network Settings -->
-                <Expander Header="Network Settings" IsExpanded="True">
+                <Expander Header="Network Settings" IsExpanded="True" MinWidth="500">
                     <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
-                        <TextBox x:Name="HostBox" Width="160" PlaceholderText="Host" Text="127.0.0.1"/>
-                        <TextBox x:Name="PortBox" Width="100" PlaceholderText="Port" Text="8080"/>
-                        <TextBox x:Name="KeyBox" Width="100" PlaceholderText="API key" Text="none"/>
+                        <TextBox x:Name="HostBox" Header="Host" Width="160" PlaceholderText="Host" Text="127.0.0.1"/>
+                        <TextBox x:Name="PortBox" Header="Port" Width="100" PlaceholderText="Port" Text="8080"/>
+                        <TextBox x:Name="KeyBox" Header="Authorization key" Width="160" PlaceholderText="API key" Text="none"/>
                     </StackPanel>
                 </Expander>
 
                 <!-- Runtime Parameters -->
-                <Expander Header="Runtime Parameters" IsExpanded="False">
+                <Expander Header="Runtime Parameters" IsExpanded="True" MinWidth="500">
                     <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
-                        <TextBox x:Name="ctxBox" Width="140" PlaceholderText="n_ctx" Text="1024"/>
-                        <TextBox x:Name="gpuLayers" Width="140" PlaceholderText="GPU layers" Text="0"/>
-                        <ComboBox x:Name="formatBox" Width="160" SelectedIndex="0" PlaceholderText="Chat format">
+                        <TextBox x:Name="ctxBox" Header="Context size" Width="140" PlaceholderText="n_ctx" Text="1024"/>
+                        <TextBox x:Name="gpuLayers" Header="GPU layers" Width="140" PlaceholderText="GPU layers" Text="0"/>
+                        <ComboBox x:Name="formatBox" Header="Chat template" Width="160" SelectedIndex="0" PlaceholderText="Chat format">
+                            <ComboBoxItem Content="default" Tag="default"/>
                             <ComboBoxItem Content="llama-3" Tag="llama-3"/>
                             <ComboBoxItem Content="llama-2" Tag="llama-2"/>
                             <ComboBoxItem Content="alpaca" Tag="alpaca"/>
@@ -65,7 +66,7 @@
                             <ComboBoxItem Content="functionary-v1" Tag="functionary-v1"/>
                             <ComboBoxItem Content="functionary-v2" Tag="functionary-v2"/>
                         </ComboBox>
-                        <ComboBox x:Name="priorityBox" SelectionChanged="priorityBox_SelectionChanged" Width="160" SelectedIndex="2" PlaceholderText="Priority">
+                        <ComboBox x:Name="priorityBox" Header="Priority" SelectionChanged="priorityBox_SelectionChanged" Width="160" SelectedIndex="2" PlaceholderText="Priority">
                             <ComboBoxItem Content="Idle"/>
                             <ComboBoxItem Content="BelowNormal"/>
                             <ComboBoxItem Content="Normal"/>
@@ -98,7 +99,15 @@
 
                 <!-- Status -->
                 <Border Background="DarkSlateGray" Padding="8" CornerRadius="4" Margin="0,12,0,0">
-                    <TextBox x:Name="StatusTextBlock" Text="Idle." FontWeight="SemiBold" Background="DarkSlateGray" Foreground="White"/>
+                    <TextBox x:Name="StatusTextBlock" 
+                             Text="Idle." 
+                             FontWeight="SemiBold" 
+                             Background="DarkSlateGray" 
+                             Foreground="White"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             Height="300"
+                             IsReadOnly="True"/>
                 </Border>
 
             </StackPanel>

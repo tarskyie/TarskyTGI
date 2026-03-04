@@ -18,7 +18,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ListBox Grid.Row="0" Grid.Column="0" x:Name="ChatHistory" Margin="0,0,10,0" SelectionChanged="ChatHistory_SelectionChanged">
+        <ListBox Grid.Row="0" Grid.Column="0" x:Name="ChatHistory" Margin="0,0,10,0" SelectionChanged="ChatHistory_SelectionChanged" Background="Transparent">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBox Text="{Binding}" TextWrapping="Wrap" IsReadOnly="True" BorderThickness="0" Background="Transparent"/>

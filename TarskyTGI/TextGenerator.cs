@@ -39,6 +39,7 @@ namespace TarskyTGI
                 $"-m \"{modelPath}\"",
                 $"--port {port}",
                 $"-np 1",
+                $"--metrics",
                 $"-ngl {gpuLayers}"
             };
             
@@ -77,7 +78,6 @@ namespace TarskyTGI
                         Console.WriteLine($"✅ Success on attempt #{attempt}: Received 404 Not Found!");
                         IsModelLoaded = true;
                         return (true, "Ready.");
-                        break; // Exit the loop
                     }
                 }
                 catch (System.Exception ex)
@@ -105,6 +105,7 @@ namespace TarskyTGI
                 $"--port {port}",
                 $"-np 1",
                 $"-c {ctx}",
+                $"--metrics",
                 $"-ngl {gpuLayers}"
             };
 
@@ -130,11 +131,32 @@ namespace TarskyTGI
             serverProcess = new Process { StartInfo = startInfo };
             serverProcess.Start();
 
-            // Give the server some time to start
-            await Task.Delay(2000);
-
-            IsModelLoaded = true;
-            return (true, "Ready. Loaded with mmproj.");
+            // ping address until 404
+            string address = $"http://localhost:{port}/nonexistentpage";
+            int attempt = 0;
+            int maxattempts = 10;
+            while (attempt <= maxattempts)
+            {
+                attempt++;
+                try
+                {
+                    HttpResponseMessage response = await httpClient.GetAsync(address);
+                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        Console.WriteLine($"✅ Success on attempt #{attempt}: Received 404 Not Found!");
+                        IsModelLoaded = true;
+                        return (true, "Ready.");
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    if (attempt >= 30)
+                    {
+                        return (false, ex.Message);
+                    }
+                }
+            }
+            return (false, $"Ran out of attempts to connect. {maxattempts} retries.");
         }
 
         public Task InsertSystemPromptAsync(string sysPrompt)
