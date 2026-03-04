@@ -3,10 +3,13 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Media.Protection.PlayReady;
@@ -30,7 +33,7 @@ namespace TarskyTGI
             // The server is started when a model is loaded
         }
 
-        public async Task<(bool success, string message)> LoadModelAsync(string modelPath, int gpuLayers, string chatFormat, System.TimeSpan? timeout = null)
+        public async Task<(bool success, string message)> LoadModelAsync(string modelPath, int gpuLayers, int ctx, string? chatFormat = null, System.TimeSpan? timeout = null)
         {
             if (serverProcess != null && !serverProcess.HasExited)
             {
@@ -43,6 +46,7 @@ namespace TarskyTGI
                 $"--port {port}",
                 $"-np 1",
                 $"--metrics",
+                $"-c {ctx}",
                 $"-ngl {gpuLayers}"
             };
             
@@ -194,31 +198,45 @@ namespace TarskyTGI
             }
         }
 
-        public async Task<string> GenerateChatCompletionAsync(List<ChatMessage> messages, System.TimeSpan? timeout = null)
+        public async Task<string> GenerateChatCompletionAsync(List<ChatMessage> messages, double temperature = 0.8, 
+            double topP = 0.95, 
+            double minP = 0.05, 
+            double typicalP = 1.0,
+            string? imagePath = null,
+            System.TimeSpan? timeout = null)
         {
             if (!IsModelLoaded || serverProcess == null || serverProcess.HasExited)
             {
                 return "Error: Model not loaded.";
             }
 
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+
             var payload = new
             {
                 messages = messages,
                 n_predict = -1,
-                temperature = 0.8,
+                temperature = temperature,
+                top_p = topP,
+                min_p = minP,
+                typical_p = typicalP,
                 stream = false
             };
 
-            var jsonPayload = JsonConvert.SerializeObject(payload);
+            var jsonPayload = System.Text.Json.JsonSerializer.Serialize(payload, options);
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
             try
             {
                 var response = await httpClient.PostAsync($"http://localhost:{port}/chat/completions", content);
-                response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode(); // fails here if image included
                 var responseString = await response.Content.ReadAsStringAsync();
-                var responseObject = JsonConvert.DeserializeObject<ChatCompletionResponse>(responseString);
-                return responseObject?.choices[0]?.message?.content ?? "Error: Empty response from server.";
+
+                var responseObject = System.Text.Json.JsonSerializer.Deserialize<ChatCompletionResponse>(responseString, options);
+
+                var choice = responseObject?.Choices?.FirstOrDefault();
+                string reply = choice?.Message?.Content ?? "Error: Empty response from server.";
+                return reply;
             }
             catch (HttpRequestException e)
             {
@@ -247,8 +265,8 @@ namespace TarskyTGI
                 model,
                 messages = messages.ConvertAll(m => new
                 {
-                    role = m.role.ToLowerInvariant(),
-                    content = m.content
+                    role = m.Role.ToLowerInvariant(),
+                    content = string.Join("\n", m.Content.ConvertAll(cp => cp.Text ?? (cp.ImageUrl != null ? cp.ImageUrl.Url : "")))
                 }),
                 temperature,
                 top_p = topP,
@@ -331,6 +349,70 @@ namespace TarskyTGI
             httpClient?.Dispose();
         }
 
+        public static ChatMessage CreateMessage(string role, string textContent, string? imagePath = null)
+        {
+            if (imagePath == null)
+            {
+                return new ChatMessage
+                {
+                    Role = role,
+                    Content = new List<ContentPart>
+                    {
+                        new ContentPart
+                        {
+                            Type = "text",
+                            Text = textContent
+                        }
+                    }
+                };
+            }
+
+            if (string.IsNullOrWhiteSpace(imagePath))
+                throw new ArgumentException("Image path cannot be empty.", nameof(imagePath));
+
+            if (!File.Exists(imagePath))
+                throw new FileNotFoundException("Image file not found.", imagePath);
+
+            // Read and convert image to base64
+            byte[] imageBytes = File.ReadAllBytes(imagePath);
+            string base64 = Convert.ToBase64String(imageBytes);
+
+            // Auto-detect correct MIME type
+            string mimeType = GetImageMimeType(imagePath);
+            string dataUrl = $"data:{mimeType};base64,{base64}";
+
+            return new ChatMessage
+            {
+                Role = role,
+                Content = new List<ContentPart>
+                {
+                    new ContentPart
+                    {
+                        Type = "text",
+                        Text = textContent
+                    },
+                    new ContentPart
+                    {
+                        Type = "image_url",
+                        ImageUrl = new ImageUrl { Url = dataUrl }
+                    }
+                }
+            };
+        }
+
+        private static string GetImageMimeType(string filePath)
+        {
+            string ext = Path.GetExtension(filePath).ToLowerInvariant();
+            return ext switch
+            {
+                ".png" => "image/png",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".webp" => "image/webp",
+                ".gif" => "image/gif",
+                _ => "image/jpeg" // fallback
+            };
+        }
+
         private class CompletionResponse
         {
             public string? Content { get; set; }
@@ -338,18 +420,44 @@ namespace TarskyTGI
 
         public class ChatMessage
         {
-            public string role { get; set; }
-            public string content { get; set; }
+            [JsonPropertyName("role")]
+            public string Role { get; set; } = string.Empty;
+
+            [JsonPropertyName("content")]
+            public List<ContentPart> Content { get; set; } = new();
         }
 
+        public class ContentPart
+        {
+            [JsonPropertyName("type")]
+            public string Type { get; set; } = string.Empty;
+
+            [JsonPropertyName("text")]
+            public string? Text { get; set; }
+
+            [JsonPropertyName("image_url")]
+            public ImageUrl? ImageUrl { get; set; }
+        }
+
+        public class ImageUrl
+        {
+            [JsonPropertyName("url")]
+            public string Url { get; set; } = string.Empty;
+        }
         private class ChatCompletionResponse
         {
-            public List<Choice>? choices { get; set; }
+            public List<Choice>? Choices { get; set; }   // note capital C
         }
 
         private class Choice
         {
-            public ChatMessage? message { get; set; }
+            public ResponseMessage? Message { get; set; }
+        }
+
+        private class ResponseMessage
+        {
+            public string? Role { get; set; }
+            public string? Content { get; set; }   // ← string, not List!
         }
     }
 }

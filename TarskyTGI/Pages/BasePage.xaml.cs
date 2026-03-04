@@ -85,7 +85,7 @@ namespace TarskyTGI
         private async Task LoadModel(string modelPath)
         {
             StatusTextBlock.Text = "Loading.";
-            var (success, message) = await textGenerator.LoadModelAsync(modelPath, int.Parse(gpuLayers.Text), "default");
+            var (success, message) = await textGenerator.LoadModelAsync(modelPath, int.Parse(gpuLayers.Text), ctx: int.Parse(ctxBox.Text));
             if (success)
             {
                 modelLoaded = true;
@@ -106,19 +106,17 @@ namespace TarskyTGI
         {
             if (PromptBox.Text.Trim() != string.Empty)
             {
-                PromptBox.Text = string.Empty;
-                mainText.Text=mainText.Text+PromptBox.Text.Trim();
                 if (!modelLoaded)
                 {
                     StatusTextBlock.Text = "Please load a model first.";
                     return;
                 }
 
-                StatusTextBlock.Text = "Generating the text";
+                mainText.Text += PromptBox.Text.Trim();
+                PromptBox.Text = string.Empty;
 
-                string inputText = PromptBox.Text.Trim();
-                string itemsAsString = mainText.Text;
-                string generatedText = await textGenerator.GenerateTextAsync(itemsAsString + inputText, num_predict: int.Parse(predictBox.Text));
+                StatusTextBlock.Text = "Generating the text";
+                string generatedText = await textGenerator.GenerateTextAsync(mainText.Text, num_predict: int.Parse(predictBox.Text));
                 string outputString = generatedText.Replace("\\n", "\n");
                 //string outputString = generatedText;
                 mainText.Text += outputString;

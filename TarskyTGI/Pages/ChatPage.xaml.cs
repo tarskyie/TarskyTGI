@@ -137,7 +137,7 @@ namespace TarskyTGI
             else
             {
                 // Call standard load
-                var (success, message) = await textGenerator.LoadModelAsync(modelPath, gpuLayers, chatFormat);
+                var (success, message) = await textGenerator.LoadModelAsync(modelPath, gpuLayers, chatFormat: chatFormat, ctx: int.Parse(ctxBox.Text));
                 modelLoaded = success;
                 StatusTextBlock.Text = success ? "Model Ready." : message;
             }
@@ -175,7 +175,7 @@ namespace TarskyTGI
 
             var messages = new List<TextGenerator.ChatMessage>
             {
-                new TextGenerator.ChatMessage { role = "system", content = systemPromptTextBox.Text }
+                TextGenerator.CreateMessage(role: "system", textContent: systemPromptTextBox.Text)
             };
 
             for (int i = 0; i < ChatHistory.Items.Count; i++)
@@ -183,11 +183,13 @@ namespace TarskyTGI
                 var item = ChatHistory.Items[i] as string;
                 if (i % 2 == 0)
                 {
-                    messages.Add(new TextGenerator.ChatMessage { role = "user", content = item });
+                    // Replace direct object initializer with CreateMessage helper
+                    messages.Add(TextGenerator.CreateMessage("user", item, imagePath: currentImgPath));
+                    
                 }
                 else
                 {
-                    messages.Add(new TextGenerator.ChatMessage { role = "assistant", content = item });
+                    messages.Add(TextGenerator.CreateMessage("assistant", item));
                 }
             }
 
@@ -208,13 +210,10 @@ namespace TarskyTGI
         private async Task<string> GenerateChat(List<TextGenerator.ChatMessage> messages)
         {
             if (textGenerator == null) return "Error: Backend not initialized.";
-            return await textGenerator.GenerateChatCompletionAsync(messages);
-        }
-
-        private async Task<string> GenerateText(string inputText, string? imgPath)
-        {
-            if (textGenerator == null) return "Error: Backend not initialized.";
-            return await textGenerator.GenerateTextAsync(inputText, imgPath);
+            return await textGenerator.GenerateChatCompletionAsync(messages, temperature: double.Parse(temperatureBox.Text), topP: double.Parse(toppBox.Text),
+                minP: double.Parse(minpBox.Text),
+                typicalP: double.Parse(typicalpBox.Text),
+                imagePath: currentImgPath);
         }
 
         private void PromptBox_KeyDown(object sender, KeyRoutedEventArgs e)

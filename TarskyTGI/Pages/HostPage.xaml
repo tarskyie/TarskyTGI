@@ -18,13 +18,17 @@
                     <StackPanel Orientation="Vertical" Spacing="8" Padding="8">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <TextBox x:Name="ModelBox" Header="Model path" Width="300" PlaceholderText="Model path"/>
-                            <Button x:Name="selectModelButton" Content="Browse..." Click="selectModelButton_Click"/>
+                            <Button x:Name="selectModelButton" VerticalAlignment="Bottom" Click="selectModelButton_Click">
+                                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                      Glyph="&#xE8B7;"
+                                      FontSize="20" />
+                            </Button>
                         </StackPanel>
                     </StackPanel>
                 </Expander>
 
                 <!-- Network Settings -->
-                <Expander Header="Network Settings" IsExpanded="True" MinWidth="500">
+                <Expander Header="Network Settings" IsExpanded="False" MinWidth="500">
                     <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
                         <TextBox x:Name="HostBox" Header="Host" Width="160" PlaceholderText="Host" Text="127.0.0.1"/>
                         <TextBox x:Name="PortBox" Header="Port" Width="100" PlaceholderText="Port" Text="8080"/>
@@ -34,46 +38,52 @@
 
                 <!-- Runtime Parameters -->
                 <Expander Header="Runtime Parameters" IsExpanded="True" MinWidth="500">
-                    <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
-                        <TextBox x:Name="ctxBox" Header="Context size" Width="140" PlaceholderText="n_ctx" Text="1024"/>
-                        <TextBox x:Name="gpuLayers" Header="GPU layers" Width="140" PlaceholderText="GPU layers" Text="0"/>
-                        <ComboBox x:Name="formatBox" Header="Chat template" Width="160" SelectedIndex="0" PlaceholderText="Chat format">
-                            <ComboBoxItem Content="default" Tag="default"/>
-                            <ComboBoxItem Content="llama-3" Tag="llama-3"/>
-                            <ComboBoxItem Content="llama-2" Tag="llama-2"/>
-                            <ComboBoxItem Content="alpaca" Tag="alpaca"/>
-                            <ComboBoxItem Content="qwen" Tag="qwen"/>
-                            <ComboBoxItem Content="vicuna" Tag="vicuna"/>
-                            <ComboBoxItem Content="oasst_llama" Tag="oasst_llama"/>
-                            <ComboBoxItem Content="baichuan-2" Tag="baichuan-2"/>
-                            <ComboBoxItem Content="baichuan" Tag="baichuan"/>
-                            <ComboBoxItem Content="openbuddy" Tag="openbuddy"/>
-                            <ComboBoxItem Content="redpajama-incite" Tag="redpajama-incite"/>
-                            <ComboBoxItem Content="snoozy" Tag="snoozy"/>
-                            <ComboBoxItem Content="phind" Tag="phind"/>
-                            <ComboBoxItem Content="intel" Tag="intel"/>
-                            <ComboBoxItem Content="open-orca" Tag="open-orca"/>
-                            <ComboBoxItem Content="mistrallite" Tag="mistrallite"/>
-                            <ComboBoxItem Content="zephyr" Tag="zephyr"/>
-                            <ComboBoxItem Content="pygmalion" Tag="pygmalion"/>
-                            <ComboBoxItem Content="chatml" Tag="chatml"/>
-                            <ComboBoxItem Content="mistral-instruct" Tag="mistral-instruct"/>
-                            <ComboBoxItem Content="chatglm3" Tag="chatglm3"/>
-                            <ComboBoxItem Content="openchat" Tag="openchat"/>
-                            <ComboBoxItem Content="saiga" Tag="saiga"/>
-                            <ComboBoxItem Content="gemma" Tag="gemma"/>
-                            <ComboBoxItem Content="functionary" Tag="functionary"/>
-                            <ComboBoxItem Content="functionary-v1" Tag="functionary-v1"/>
-                            <ComboBoxItem Content="functionary-v2" Tag="functionary-v2"/>
-                        </ComboBox>
-                        <ComboBox x:Name="priorityBox" Header="Priority" SelectionChanged="priorityBox_SelectionChanged" Width="160" SelectedIndex="2" PlaceholderText="Priority">
-                            <ComboBoxItem Content="Idle"/>
-                            <ComboBoxItem Content="BelowNormal"/>
-                            <ComboBoxItem Content="Normal"/>
-                            <ComboBoxItem Content="AboveNormal"/>
-                            <ComboBoxItem Content="High"/>
-                            <ComboBoxItem Content="RealTime"/>
-                        </ComboBox>
+                    <StackPanel Orientation="Vertical" Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
+                            <TextBox x:Name="ctxBox" Header="Context size" Width="140" PlaceholderText="n_ctx" Text="1024"/>
+                            <TextBox x:Name="gpuLayers" Header="GPU layers" Width="140" PlaceholderText="GPU layers" Text="0"/>
+                            <ComboBox x:Name="formatBox" Header="Chat template" Width="160" SelectedIndex="0" PlaceholderText="Chat format">
+                                <ComboBoxItem Content="default" Tag="default"/>
+                                <ComboBoxItem Content="llama-3" Tag="llama-3"/>
+                                <ComboBoxItem Content="llama-2" Tag="llama-2"/>
+                                <ComboBoxItem Content="alpaca" Tag="alpaca"/>
+                                <ComboBoxItem Content="qwen" Tag="qwen"/>
+                                <ComboBoxItem Content="vicuna" Tag="vicuna"/>
+                                <ComboBoxItem Content="oasst_llama" Tag="oasst_llama"/>
+                                <ComboBoxItem Content="baichuan-2" Tag="baichuan-2"/>
+                                <ComboBoxItem Content="baichuan" Tag="baichuan"/>
+                                <ComboBoxItem Content="openbuddy" Tag="openbuddy"/>
+                                <ComboBoxItem Content="redpajama-incite" Tag="redpajama-incite"/>
+                                <ComboBoxItem Content="snoozy" Tag="snoozy"/>
+                                <ComboBoxItem Content="phind" Tag="phind"/>
+                                <ComboBoxItem Content="intel" Tag="intel"/>
+                                <ComboBoxItem Content="open-orca" Tag="open-orca"/>
+                                <ComboBoxItem Content="mistrallite" Tag="mistrallite"/>
+                                <ComboBoxItem Content="zephyr" Tag="zephyr"/>
+                                <ComboBoxItem Content="pygmalion" Tag="pygmalion"/>
+                                <ComboBoxItem Content="chatml" Tag="chatml"/>
+                                <ComboBoxItem Content="mistral-instruct" Tag="mistral-instruct"/>
+                                <ComboBoxItem Content="chatglm3" Tag="chatglm3"/>
+                                <ComboBoxItem Content="openchat" Tag="openchat"/>
+                                <ComboBoxItem Content="saiga" Tag="saiga"/>
+                                <ComboBoxItem Content="gemma" Tag="gemma"/>
+                                <ComboBoxItem Content="functionary" Tag="functionary"/>
+                                <ComboBoxItem Content="functionary-v1" Tag="functionary-v1"/>
+                                <ComboBoxItem Content="functionary-v2" Tag="functionary-v2"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
+                            <ComboBox x:Name="priorityBox" Header="Priority" SelectionChanged="priorityBox_SelectionChanged" Width="160" SelectedIndex="2" PlaceholderText="Priority">
+                                <ComboBoxItem Content="Idle"/>
+                                <ComboBoxItem Content="BelowNormal"/>
+                                <ComboBoxItem Content="Normal"/>
+                                <ComboBoxItem Content="AboveNormal"/>
+                                <ComboBoxItem Content="High"/>
+                                <ComboBoxItem Content="RealTime"/>
+                            </ComboBox>
+                            <TextBox x:Name="NumConcurrentReqsTextBox" Header="Max. concurrent requests" Text="4" PlaceholderText="-np value" />
+                        </StackPanel>
                     </StackPanel>
                 </Expander>
 

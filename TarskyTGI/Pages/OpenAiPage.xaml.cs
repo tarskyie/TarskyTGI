@@ -90,7 +90,7 @@ namespace TarskyTGI.Pages
 
             // Add user message to UI + history
             ChatHistory.Items.Add($"You: {input}");
-            conversationHistory.Add(new TextGenerator.ChatMessage { role = "user", content=input });
+            conversationHistory.Add(TextGenerator.CreateMessage("user", input));
             PromptBox.Text = string.Empty;
 
             StatusTextBlock.Text = "Thinking...";
@@ -99,7 +99,7 @@ namespace TarskyTGI.Pages
             {
                 var messages = new List<TextGenerator.ChatMessage>
             {
-                new TextGenerator.ChatMessage { role = "system", content = systemPromptTextBox.Text }
+                TextGenerator.CreateMessage("system", systemPromptTextBox.Text)
             };
                 messages.AddRange(conversationHistory);
 
@@ -112,7 +112,7 @@ namespace TarskyTGI.Pages
                     baseUrl: baseUrl);
 
                 ChatHistory.Items.Add($"Assistant: {reply}");
-                conversationHistory.Add(new TextGenerator.ChatMessage { role = "assistant", content = reply });
+                conversationHistory.Add(TextGenerator.CreateMessage("assistant", reply));
 
                 StatusTextBlock.Text = "Ready";
             }
