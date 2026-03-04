@@ -172,7 +172,7 @@ namespace TarskyTGI
             return Task.CompletedTask;
         }
 
-        public async Task<string> GenerateTextAsync(string inputText, string? imagePath = null, System.TimeSpan? timeout = null)
+        public async Task<string> GenerateTextAsync(string inputText, string? imagePath = null, int? num_predict = -1, System.TimeSpan? timeout = null)
         {
             if (!IsModelLoaded || serverProcess == null || serverProcess.HasExited)
             {
@@ -182,7 +182,7 @@ namespace TarskyTGI
             var payload = new
             {
                 prompt = inputText,
-                n_predict = -1,
+                n_predict = num_predict,
                 temperature = 0.8,
                 stream = false
             };

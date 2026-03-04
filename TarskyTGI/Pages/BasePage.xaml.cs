@@ -1,32 +1,17 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Storage.Pickers;
 using Windows.Storage;
 using WinRT.Interop;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace TarskyTGI
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class BasePage : Page
     {
         private TextGenerator textGenerator = new TextGenerator();
@@ -101,7 +86,7 @@ namespace TarskyTGI
         private async Task LoadModel(string modelPath)
         {
             StatusTextBlock.Text = "Loading.";
-            var (success, message) = await textGenerator.LoadModelAsync(modelPath, 0, "chatml");
+            var (success, message) = await textGenerator.LoadModelAsync(modelPath, 0, "default");
             if (success)
             {
                 modelLoaded = true;
@@ -134,7 +119,7 @@ namespace TarskyTGI
 
                 string inputText = PromptBox.Text.Trim();
                 string itemsAsString = mainText.Text;
-                string generatedText = await textGenerator.GenerateTextAsync(itemsAsString + inputText);
+                string generatedText = await textGenerator.GenerateTextAsync(itemsAsString + inputText, num_predict: int.Parse(predictBox.Text));
                 string outputString = generatedText.Replace("\\n", "\n");
                 //string outputString = generatedText;
                 mainText.Text += outputString;
@@ -153,11 +138,6 @@ namespace TarskyTGI
                 e.Handled = true;
                 SendFN(sender, e);
             }
-        }
-
-        string GetListBoxItemsAsNewlineSeparatedString(ListBox listBox)
-        {
-            return string.Join("\\n", listBox.Items.Cast<object>().Select(item => item.ToString()));
         }
 
         private void Window_Closed(object sender, WindowEventArgs args)

@@ -18,7 +18,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Main text area (read-only display of conversation/history) -->
+        <!-- Main text area -->
         <TextBox x:Name="mainText"
                  Grid.Row="0" Grid.Column="0"
                  Margin="0,0,10,0"
@@ -68,14 +68,21 @@
                 </Grid>
 
                 <Grid ColumnDefinitions="*,Auto">
-                    <TextBox x:Name="predictBox" PlaceholderText="n_predict" Text="128" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ModelBox_TextChanged"/>
-                    <Button x:Name="loadbtn" Content="Load Model" Click="LoadModelButton_Click" Grid.Column="1" Margin="5,0,0,0" HorizontalAlignment="Stretch"/>
+                    <TextBox x:Name="gpuLayers" Header="GPU Layers" Text="0" Margin="0,0,5,0"/>
+                    <Button x:Name="loadbtn" Content="Load Model" Click="LoadModelButton_Click" Grid.Column="1" Margin="5,0,0,0" 
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Bottom"/>
                 </Grid>
 
                 <MenuFlyoutSeparator/>
 
-                <Expander Header="Generation Parameters" HorizontalAlignment="Stretch" IsExpanded="False">
+                <Expander Header="Generation Parameters" HorizontalAlignment="Stretch" IsExpanded="True">
                     <StackPanel Spacing="8">
+                        <TextBox x:Name="predictBox" Header="Max. prediction tokens" 
+                                 PlaceholderText="n_predict (-1 for default)" 
+                                 Text="128" 
+                                 BeforeTextChanging="TextBox_BeforeTextChanging" 
+                                 TextChanged="ModelBox_TextChanged"/>
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock Text="Context Size (n_ctx)" VerticalAlignment="Center"/>
                             <TextBox x:Name="ctxBox" Text="1024" Width="60" BeforeTextChanging="TextBox_BeforeTextChanging" Grid.Column="1" Margin="10,0,0,0"/>
