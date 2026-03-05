@@ -176,6 +176,32 @@ namespace TarskyTGI.Pages
         {
             ((ListBox)sender).SelectedIndex = -1;
         }
+
+        private void temperatureSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        {
+            temperatureBox.Text = Math.Round(temperatureSlider.Value, 2).ToString();
+        }
+
+        private void toppSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        {
+            toppBox.Text = Math.Round(toppSlider.Value, 2).ToString();
+        }
+
+        private void toppBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                toppSlider.Value = float.Parse(toppBox.Text);
+            } catch { }
+        }
+
+        private void temperatureBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                temperatureSlider.Value = float.Parse(temperatureBox.Text);
+            } catch { }
+        }
     }
 
     // ── Config saved to chat.json ──

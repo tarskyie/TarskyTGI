@@ -116,33 +116,33 @@
                     <StackPanel Spacing="8">
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock Text="Context Size (n_ctx)" VerticalAlignment="Center"/>
-                            <TextBox x:Name="ctxBox" Text="2048" Width="60" BeforeTextChanging="TextBox_BeforeTextChanging" Grid.Column="1" Margin="10,0,0,0"/>
+                            <TextBox x:Name="ctxBox" Text="2048" Width="60" BeforeTextChanging="TextBox_BeforeTextChanging" TextChanged="ctxBox_TextChanged" Grid.Column="1" Margin="10,0,0,0"/>
                         </Grid>
-                        <Slider x:Name="ctxSlider" Minimum="128" Maximum="8192" Value="2048" StepFrequency="128" Margin="0,5,0,0"/>
+                        <Slider x:Name="ctxSlider" ValueChanged="ctxSlider_ValueChanged" Minimum="128" Maximum="8192" Value="2048" StepFrequency="128" Margin="0,5,0,0"/>
 
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock Text="Temperature" VerticalAlignment="Center"/>
-                            <TextBox x:Name="temperatureBox" Text="0.8" Width="60" BeforeTextChanging="TextBox2_BeforeTextChanging" Grid.Column="1" Margin="10,0,0,0"/>
+                            <TextBox x:Name="temperatureBox" Text="0.8" Width="60" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="temperatureBox_TextChanged" Grid.Column="1" Margin="10,0,0,0"/>
                         </Grid>
-                        <Slider x:Name="temperatureSlider" Minimum="0" Maximum="2" Value="0.8" StepFrequency="0.05" Margin="0,5,0,0"/>
+                        <Slider x:Name="temperatureSlider" ValueChanged="temperatureSlider_ValueChanged" Minimum="0" Maximum="2" Value="0.8" StepFrequency="0.05" Margin="0,5,0,0"/>
 
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock Text="Top P" VerticalAlignment="Center"/>
-                            <TextBox x:Name="toppBox" Text="0.95" Width="60" BeforeTextChanging="TextBox2_BeforeTextChanging" Grid.Column="1" Margin="10,0,0,0"/>
+                            <TextBox x:Name="toppBox" Text="0.95" Width="60" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="toppBox_TextChanged" Grid.Column="1" Margin="10,0,0,0"/>
                         </Grid>
-                        <Slider x:Name="toppSlider" Minimum="0" Maximum="1" Value="0.95" StepFrequency="0.01" Margin="0,5,0,0"/>
+                        <Slider x:Name="toppSlider" ValueChanged="toppSlider_ValueChanged" Minimum="0" Maximum="1" Value="0.95" StepFrequency="0.01" Margin="0,5,0,0"/>
 
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock Text="Min P" VerticalAlignment="Center"/>
-                            <TextBox x:Name="minpBox" Text="0.05" Width="60" BeforeTextChanging="TextBox2_BeforeTextChanging" Grid.Column="1" Margin="10,0,0,0"/>
+                            <TextBox x:Name="minpBox" Text="0.05" Width="60" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="minpBox_TextChanged" Grid.Column="1" Margin="10,0,0,0"/>
                         </Grid>
-                        <Slider x:Name="minpSlider" Minimum="0" Maximum="1" Value="0.05" StepFrequency="0.01" Margin="0,5,0,0"/>
+                        <Slider x:Name="minpSlider" ValueChanged="minpSlider_ValueChanged" Minimum="0" Maximum="1" Value="0.05" StepFrequency="0.01" Margin="0,5,0,0"/>
 
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock Text="Typical P" VerticalAlignment="Center"/>
-                            <TextBox x:Name="typicalpBox" Text="1" Width="60" BeforeTextChanging="TextBox2_BeforeTextChanging" Grid.Column="1" Margin="10,0,0,0"/>
+                            <TextBox x:Name="typicalpBox" Text="1" Width="60" BeforeTextChanging="TextBox2_BeforeTextChanging" TextChanged="typicalpBox_TextChanged" Grid.Column="1" Margin="10,0,0,0"/>
                         </Grid>
-                        <Slider x:Name="typicalpSlider" Minimum="0" Maximum="1" Value="1" StepFrequency="0.01" Margin="0,5,0,0"/>
+                        <Slider x:Name="typicalpSlider" ValueChanged="typicalpSlider_ValueChanged" Minimum="0" Maximum="1" Value="1" StepFrequency="0.01" Margin="0,5,0,0"/>
                     </StackPanel>
                 </Expander>
 
