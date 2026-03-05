@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Windows.Media.Devices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
@@ -355,6 +356,71 @@ namespace TarskyTGI
         private void ChatHistory_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ((ListBox)sender).SelectedIndex = -1;
+        }
+
+        private void ctxBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                ctxSlider.Value = int.Parse(ctxBox.Text);
+            } catch { }
+        }
+
+        private void temperatureBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                temperatureSlider.Value = float.Parse(temperatureBox.Text);
+            } catch { }
+        }
+
+        private void toppBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                toppSlider.Value = float.Parse(toppBox.Text);
+            } catch { }
+        }
+
+        private void minpBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                minpSlider.Value = float.Parse(minpBox.Text);
+            } catch { }
+        }
+
+        private void typicalpBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                typicalpSlider.Value = float.Parse(typicalpBox.Text);
+            } catch { }
+        }
+
+        private void temperatureSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        {
+            temperatureBox.Text = Math.Round(temperatureSlider.Value, 2).ToString();
+        }
+
+        private void ctxSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        {
+            ctxBox.Text = ctxSlider.Value.ToString();
+        }
+
+        private void toppSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        {
+            toppBox.Text = Math.Round(toppSlider.Value, 2).ToString();
+        }
+
+        private void minpSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        {
+            minpBox.Text = Math.Round(minpSlider.Value, 2).ToString();
+        }
+
+        private void typicalpSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        {
+            typicalpBox.Text = Math.Round(typicalpSlider.Value, 2).ToString();
         }
     }
 }

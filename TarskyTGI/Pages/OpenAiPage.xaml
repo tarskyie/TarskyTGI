@@ -95,17 +95,17 @@
                 <StackPanel Spacing="12">
                     <Grid ColumnDefinitions="*,Auto">
                         <TextBlock Text="Temperature" VerticalAlignment="Center"/>
-                        <TextBox x:Name="temperatureBox" Text="0.8" Width="64"
+                        <TextBox x:Name="temperatureBox" Text="0.8" Width="64" TextChanged="temperatureBox_TextChanged"
                                  BeforeTextChanging="TextBox2_BeforeTextChanging" Grid.Column="1"/>
                     </Grid>
-                    <Slider x:Name="temperatureSlider" Minimum="0" Maximum="2" Value="0.8" StepFrequency="0.05"/>
+                    <Slider x:Name="temperatureSlider" ValueChanged="temperatureSlider_ValueChanged" Minimum="0" Maximum="2" Value="0.8" StepFrequency="0.05"/>
 
                     <Grid ColumnDefinitions="*,Auto">
                         <TextBlock Text="Top P" VerticalAlignment="Center"/>
-                        <TextBox x:Name="toppBox" Text="0.95" Width="64"
+                        <TextBox x:Name="toppBox" Text="0.95" Width="64" TextChanged="toppBox_TextChanged"
                                  BeforeTextChanging="TextBox2_BeforeTextChanging" Grid.Column="1"/>
                     </Grid>
-                    <Slider x:Name="toppSlider" Minimum="0" Maximum="1" Value="0.95" StepFrequency="0.01"/>
+                    <Slider x:Name="toppSlider" ValueChanged="toppSlider_ValueChanged" Minimum="0" Maximum="1" Value="0.95" StepFrequency="0.01"/>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>
